@@ -2,7 +2,7 @@ package com.example.furqanmyqurancompanion;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -10,34 +10,40 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.airbnb.lottie.LottieAnimationView;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
 
-public class SplashScreen extends AppCompatActivity {
+public class LoginPage extends AppCompatActivity {
 
-    LottieAnimationView lottie;
+    TextInputEditText etLoginEmail , etLoginPassword;
+    MaterialButton login_button;
+    TextView signup_page_nav;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_splash_screen);
+        setContentView(R.layout.activity_login_page);
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
+
+
         init();
-        new Handler().postDelayed(() -> {
-            startActivity(new Intent(SplashScreen.this, LoginPage.class));
+
+        signup_page_nav.setOnClickListener(v->{
+            startActivity(new Intent(LoginPage.this, SignUpPage.class));
             finish();
-        }, 3200);
+        });
     }
 
-    public void init(){
-        lottie = findViewById(R.id.lottie_loading_bar);
-        lottie.setAnimation(R.raw.loading_bar);
-        lottie.setSpeed(3.125f);
-        lottie.playAnimation();
+    private void init(){
+        etLoginEmail=findViewById(R.id.etLoginEmail);
+        etLoginPassword=findViewById(R.id.etLoginPassword);
+        login_button=findViewById(R.id.btnLogin);
+        signup_page_nav=findViewById(R.id.tvSignUp);
     }
 }

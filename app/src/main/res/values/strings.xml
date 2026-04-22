@@ -1,4 +1,15 @@
 <resources>
     <string name="app_name">Furqan My Quran Companion</string>
     <string name="Bismillah_Spash_Text">بِسْمِ اللَّهِ الرَّحْمَـٰنِ الرَّحِيمِ</string>
+    <string name="sign_up_button">Sign Up</string>
+    <string name="signup_question">Don\'t have an account? </string>
+    <string name="or">OR</string>
+    <string name="Login_button">Login</string>
+    <string name="Password_text">Password</string>
+    <string name="Email_text">Email Address</string>
+    <string name="welcome_back_text">Return to Light!</string>
+    <string name="Enter_heading">Open Your Heart!</string>
+    <string name="confirm_password_text">Confirm Password</string>
+    <string name="password_heading">Password</string>
+    <string name="already_have_an_account_question">Already have an account? </string>
 </resources>

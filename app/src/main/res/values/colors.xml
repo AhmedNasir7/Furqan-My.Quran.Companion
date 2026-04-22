@@ -1,24 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <resources>
-<color name="black">#FF000000</color>
-<color name="white">#FFFFFFFF</color>
-<color name="primary">#0A2A3A</color>
-<color name="secondary">#4A7C6B</color>
-<color name="tertiary">#C6A43F</color>
-<color name="neutral">#767778</color>
-<color name="neutral_soft">#E0E6E9</color>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="primary">#0A2A3A</color>
+    <color name="secondary">#4A7C6B</color>
+    <color name="tertiary">#C6A43F</color>
+    <color name="neutral">#767778</color>
+    <color name="neutral_soft">#E0E6E9</color>
 
-<color name="background">#FFEFCD</color>
-<color name="card_background">#FFFFFF</color>
+    <color name="background">#FFEFCD</color>
+    <color name="card_background">#FFFFFF</color>
 
-<color name="text_primary">#0A2A3A</color>
-<color name="text_secondary">#4A7C6B</color>
-<color name="text_light">#FFFFFF</color>
-<color name="text_hint">#767778</color>
+    <color name="text_primary">#0A2A3A</color>
+    <color name="text_secondary">#4A7C6B</color>
+    <color name="text_light">#FFFFFF</color>
+    <color name="text_hint">#000000</color>
 
-<color name="success">#4A7C6B</color>
-<color name="error">#D9534F</color>
+    <color name="success">#4A7C6B</color>
+    <color name="error">#D9534F</color>
 
-<color name="divider">#E0E6E9</color>
+    <color name="divider">#E0E6E9</color>
 </resources>
