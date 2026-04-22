@@ -1,7 +1,29 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.FurqanMyQuranCompanion" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <item name="android:windowBackground">@color/background</item>
+        <item name="colorPrimary">#0A2A3A</item>
+        <item name="colorPrimaryVariant">#1A4054</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+
+        <item name="colorSecondary">#4A7C6B</item>
+        <item name="colorSecondaryVariant">#3A5C4B</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+
+        <item name="colorTertiary">#C6A43F</item>
+        <item name="colorOnTertiary">#0A2A3A</item>
+
+        <item name="android:colorBackground">#FFFFFF</item>
+        <item name="colorOnBackground">#0A2A3A</item>
+
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#0A2A3A</item>
+
+        <item name="colorError">#D9534F</item>
+        <item name="colorOnError">#FFFFFF</item>
+
+        <item name="android:windowLightStatusBar">true</item>
     </style>
+
+    <style name="Theme.FurqanMyQuranCompanion" parent="Base.Theme.FurqanMyQuranCompanion" />
 </resources>
