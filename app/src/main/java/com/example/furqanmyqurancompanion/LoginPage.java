@@ -1,23 +1,36 @@
 package com.example.furqanmyqurancompanion;
 
+import static androidx.core.content.ContentProviderCompat.requireContext;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginPage extends AppCompatActivity {
 
     TextInputEditText etLoginEmail , etLoginPassword;
     MaterialButton login_button;
     TextView signup_page_nav;
+
+    FirebaseAuth fb_auth;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +51,25 @@ public class LoginPage extends AppCompatActivity {
             startActivity(new Intent(LoginPage.this, SignUpPage.class));
             finish();
         });
+
+        login_button.setOnClickListener(v->{
+            String email = etLoginEmail.getText().toString().trim();
+            String password = etLoginPassword.getText().toString().trim();
+
+            fb_auth.signInWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                @Override
+                public void onSuccess(AuthResult authResult) {
+
+                    startActivity(new Intent(LoginPage.this,MainActivity.class));
+                    finish();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(LoginPage.this,e.getMessage(),Toast.LENGTH_LONG).show();
+                }
+            });
+        });
     }
 
     private void init(){
@@ -45,5 +77,6 @@ public class LoginPage extends AppCompatActivity {
         etLoginPassword=findViewById(R.id.etLoginPassword);
         login_button=findViewById(R.id.btnLogin);
         signup_page_nav=findViewById(R.id.tvSignUp);
+        fb_auth = FirebaseAuth.getInstance();
     }
 }

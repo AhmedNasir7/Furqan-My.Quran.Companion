@@ -2,22 +2,33 @@ package com.example.furqanmyqurancompanion;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SignUpPage extends AppCompatActivity {
 
     TextInputEditText etSignUpEmail , etSignupPassword , etSignupConfirmPassword;
     MaterialButton signupButton;
     TextView login_page_nav;
+
+    FirebaseAuth auth;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -35,6 +46,41 @@ public class SignUpPage extends AppCompatActivity {
             startActivity(new Intent(SignUpPage.this, LoginPage.class));
             finish();
         });
+
+        signupButton.setOnClickListener(v->{
+            String email = etSignUpEmail.getText().toString().trim();
+            String password = etSignupPassword.getText().toString().trim();
+            String cpassword = etSignupConfirmPassword.getText().toString().trim();
+
+            if(cpassword.equals(password))
+            {
+                auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                    @Override
+                    public void onSuccess(AuthResult authResult) {
+
+                        new Handler().postDelayed(() -> {
+                            Toast.makeText(SignUpPage.this,"Signup was successful",Toast.LENGTH_LONG).show();
+                        }, 1000);
+                        startActivity(new Intent(SignUpPage.this,MainActivity.class));
+                        finish();
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(SignUpPage.this,e.getMessage(),Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+            else {
+                Toast.makeText(SignUpPage.this,"Passwords don't match",Toast.LENGTH_LONG).show();
+                etSignupConfirmPassword.setError(
+
+                        "No match"
+                );
+            }
+
+
+        });
     }
 
     private void init(){
@@ -43,5 +89,6 @@ public class SignUpPage extends AppCompatActivity {
         etSignupConfirmPassword=findViewById(R.id.etSignupConfirmPassword);
         signupButton=findViewById(R.id.btnSignUp);
         login_page_nav=findViewById(R.id.tvLogin);
+        auth=FirebaseAuth.getInstance();
     }
 }
