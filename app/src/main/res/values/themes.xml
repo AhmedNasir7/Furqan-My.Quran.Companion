@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <style name="Base.Theme.FurqanMyQuranCompanion" parent="Theme.Material3.Light.NoActionBar">
+    <style name="Base.Theme.Demo" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed">false</item>
 
         <item name="android:windowBackground">@color/background</item>
@@ -30,5 +30,5 @@
         <item name="colorControlActivated">@color/secondary</item>
     </style>
 
-    <style name="Theme.FurqanMyQuranCompanion" parent="Base.Theme.FurqanMyQuranCompanion" />
+    <style name="Theme.Demo" parent="Base.Theme.Demo" />
 </resources>

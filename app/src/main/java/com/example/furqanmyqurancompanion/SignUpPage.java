@@ -50,9 +50,9 @@ public class SignUpPage extends AppCompatActivity {
         signupButton.setOnClickListener(v->{
             String email = etSignUpEmail.getText().toString().trim();
             String password = etSignupPassword.getText().toString().trim();
-            String cpassword = etSignupConfirmPassword.getText().toString().trim();
+            String cPassword = etSignupConfirmPassword.getText().toString().trim();
 
-            if(cpassword.equals(password))
+            if(cPassword.equals(password))
             {
                 auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
