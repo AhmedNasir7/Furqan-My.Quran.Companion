@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "218388255760",
+    "project_id": "furqan-my-quran-companion",
+    "storage_bucket": "furqan-my-quran-companion.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218388255760:android:ddd8f3c92ae5ffad7ea695",
+        "android_client_info": {
+          "package_name": "com.example.furqanmyqurancompanion"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCehMj-ne3YCTpEUl6znX9K9WLi9nMdLjc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
