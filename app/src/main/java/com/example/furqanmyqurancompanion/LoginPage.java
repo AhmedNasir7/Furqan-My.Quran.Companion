@@ -3,6 +3,7 @@ package com.example.furqanmyqurancompanion;
 import static androidx.core.content.ContentProviderCompat.requireContext;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,9 +57,20 @@ public class LoginPage extends AppCompatActivity {
             String email = etLoginEmail.getText().toString().trim();
             String password = etLoginPassword.getText().toString().trim();
 
+
+
             fb_auth.signInWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                 @Override
                 public void onSuccess(AuthResult authResult) {
+
+                    SharedPreferences spref = getSharedPreferences("user",MODE_PRIVATE);
+                    SharedPreferences.Editor editor = spref.edit();
+
+                    boolean isLoggedIn=true;
+                    editor.putBoolean("isLoggedIn",isLoggedIn);
+                    editor.putString("user_email",email);
+                    editor.putString("user_password",password);
+                    editor.commit();
 
                     startActivity(new Intent(LoginPage.this,MainActivity.class));
                     finish();

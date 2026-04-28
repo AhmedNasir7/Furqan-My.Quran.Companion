@@ -1,8 +1,10 @@
 package com.example.furqanmyqurancompanion;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -19,14 +21,22 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
 
 public class SignUpPage extends AppCompatActivity {
 
     TextInputEditText etSignUpEmail , etSignupPassword , etSignupConfirmPassword;
     MaterialButton signupButton;
+    FirebaseAuth fb_auth;
     TextView login_page_nav;
 
-    FirebaseAuth auth;
+    FirebaseFirestore database;
+
+
 
 
     @Override
@@ -54,13 +64,33 @@ public class SignUpPage extends AppCompatActivity {
 
             if(cPassword.equals(password))
             {
-                auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                fb_auth.createUserWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
                     @Override
                     public void onSuccess(AuthResult authResult) {
 
                         new Handler().postDelayed(() -> {
                             Toast.makeText(SignUpPage.this,"Signup was successful",Toast.LENGTH_LONG).show();
+                            String userId = fb_auth.getCurrentUser().getUid();
+                            HashMap<String, Object> user = new HashMap<>();
+                            user.put("email", email);
+
+                            database.collection("user").document(userId).set(user).
+                                    addOnSuccessListener(aVoid -> Log.d("TAG", "DocumentSnapshot successfully written!"))
+                                    .addOnFailureListener(e -> Log.w("TAG", "Error writing document", e));
+
+
+
+
+
                         }, 1000);
+                        SharedPreferences spref = getSharedPreferences("user",MODE_PRIVATE);
+                        SharedPreferences.Editor editor = spref.edit();
+
+                        boolean isLoggedIn=true;
+                        editor.putBoolean("isLoggedIn",isLoggedIn);
+                        editor.putString("user_email",email);
+                        editor.putString("user_password",password);
+                        editor.commit();
                         startActivity(new Intent(SignUpPage.this,MainActivity.class));
                         finish();
                     }
@@ -84,11 +114,13 @@ public class SignUpPage extends AppCompatActivity {
     }
 
     private void init(){
+        fb_auth=FirebaseAuth.getInstance();
         etSignUpEmail=findViewById(R.id.etSignUpEmail);
         etSignupPassword=findViewById(R.id.etSignUpPassword);
         etSignupConfirmPassword=findViewById(R.id.etSignupConfirmPassword);
         signupButton=findViewById(R.id.btnSignUp);
         login_page_nav=findViewById(R.id.tvLogin);
-        auth=FirebaseAuth.getInstance();
+        database=FirebaseFirestore.getInstance();
+
     }
 }

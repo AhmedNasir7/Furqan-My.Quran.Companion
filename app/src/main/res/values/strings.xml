@@ -19,4 +19,20 @@
     <string name="profile">Profile</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="furqan">Furqan</string>
+    <string name="greet_sub_text">May your day be filled with light.</string>
+    <string name="welcome_back_user">Welcome Back User!</string>
+    <string name="resume_recitation">Resume Recitation</string>
+    <string name="quick_access">Quick Access</string>
+
+    <string name="read_quran">Read Quran</string>
+    <string name="read_quran_subtitle">Explore Surahs &amp; Juz</string>
+    <string name="listen_quran">Listen Quran</string>
+    <string name="listen_quran_subtitle">Top Qaris available</string>
+    <string name="namaz_guide">Namaz Guide</string>
+    <string name="namaz_guide_subtitle">Step-by-step prayer</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="bookmarks_subtitle">Your saved verses</string>
+    <string name="tasbih_counter">Tasbih Counter</string>
+    <string name="tasbih_counter_subtitle">Digital dhikr counter</string>
 </resources>
