@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background"
-    tools:context=".LoginPage"
+    tools:context=".Activities.LoginPage"
     android:fillViewport="true">
 
 <LinearLayout

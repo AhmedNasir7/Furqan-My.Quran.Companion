@@ -1,20 +1,20 @@
-package com.example.furqanmyqurancompanion;
+package com.example.furqanmyqurancompanion.Activities;
 
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import com.example.furqanmyqurancompanion.R;
+import com.example.furqanmyqurancompanion.Adapters.ViewPagerAdapter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
-    ViewPager2 pager;
+    public ViewPager2 pager;
     BottomNavigationView BottomNavView;
     ViewPagerAdapter adapter;
 

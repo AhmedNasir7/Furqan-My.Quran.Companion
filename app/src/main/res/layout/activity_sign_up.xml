@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/background"
-    tools:context=".SignUpPage"
+    tools:context=".Activities.SignUpPage"
     android:fillViewport="true">
 
     <LinearLayout

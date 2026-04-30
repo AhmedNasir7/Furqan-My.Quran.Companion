@@ -1,6 +1,4 @@
-package com.example.furqanmyqurancompanion;
-
-import static androidx.core.content.ContentProviderCompat.requireContext;
+package com.example.furqanmyqurancompanion.Activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -15,14 +13,13 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.example.furqanmyqurancompanion.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 public class LoginPage extends AppCompatActivity {
 

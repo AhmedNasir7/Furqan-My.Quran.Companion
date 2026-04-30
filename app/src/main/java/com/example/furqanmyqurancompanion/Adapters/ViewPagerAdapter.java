@@ -1,4 +1,10 @@
-package com.example.furqanmyqurancompanion;
+package com.example.furqanmyqurancompanion.Adapters;
+
+import com.example.furqanmyqurancompanion.Fragments.audioFragment;
+import com.example.furqanmyqurancompanion.Fragments.guideFragment;
+import com.example.furqanmyqurancompanion.Fragments.homeFragment;
+import com.example.furqanmyqurancompanion.Fragments.profileFragment;
+import com.example.furqanmyqurancompanion.Fragments.quranFragment;
 
 public class ViewPagerAdapter extends androidx.viewpager2.adapter.FragmentStateAdapter {
     public ViewPagerAdapter(@androidx.annotation.NonNull androidx.fragment.app.FragmentActivity fragmentActivity) {

@@ -35,4 +35,16 @@
     <string name="bookmarks_subtitle">Your saved verses</string>
     <string name="tasbih_counter">Tasbih Counter</string>
     <string name="tasbih_counter_subtitle">Digital dhikr counter</string>
+    <string name="subhan_allah">SubhanAllah</string>
+    <string name="tap">TAP</string>
+    <string name="reset">Reset</string>
+    <string name="target_33">Target: 33</string>
+    <string name="zero">0</string>
+    <string name="surah_explorer">Surah Explorer</string>
+    <string name="explore_the_divine_revelation_through_surah_or_juz">Explore the Divine revelation through Surah or Juz.</string>
+    <string name="quran_decoration">Quran Decoration</string>
+    <string name="search_surah_or_verse">Search Surah or Verse...</string>
+    <string name="by_surah">By Surah</string>
+    <string name="by_juz">By Juz</string>
+    <string name="blessed_is_he_who_sent_down_the_criterion_upon_his_servant_that_he_may_be_to_the_worlds_a_warner">Blessed is he who sent down the Criterion upon his Servant that he may be to the worlds a warner -</string>
 </resources>

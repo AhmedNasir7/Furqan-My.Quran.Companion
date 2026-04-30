@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <application
+        android:name=".Model.MyApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -12,16 +13,22 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.Demo">
         <activity
-            android:name=".SignUpPage"
+            android:name=".Activities.ReadPage"
             android:exported="false" />
         <activity
-            android:name=".LoginPage"
+            android:name=".Activities.TasbeehCounterPage"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
+            android:name=".Activities.SignUpPage"
             android:exported="false" />
         <activity
-            android:name=".SplashScreen"
+            android:name=".Activities.LoginPage"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.SplashScreen"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

@@ -1,4 +1,4 @@
-package com.example.furqanmyqurancompanion;
+package com.example.furqanmyqurancompanion.Activities;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,6 +14,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.airbnb.lottie.LottieAnimationView;
+import com.example.furqanmyqurancompanion.Model.MyApplication;
+import com.example.furqanmyqurancompanion.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
@@ -37,6 +39,7 @@ public class SplashScreen extends AppCompatActivity {
 
         init();
         new Handler().postDelayed(() -> {
+            MyApplication application = new MyApplication();
             SharedPreferences spref = getSharedPreferences("user",MODE_PRIVATE);
             boolean isLoggedIn = spref.getBoolean("isLoggedIn",false);
             if(isLoggedIn==true)
