@@ -51,7 +51,7 @@ public class BookmarksActivity extends AppCompatActivity {
         rvAyahs = findViewById(R.id.rvAyahs);
         btnMenu = findViewById(R.id.btnMenu);
 
-        tvReadPageTitle.setText("Bookmarks");
+        tvReadPageTitle.setText(getString(R.string.bookmarks));
         dbHelper = ((MyApplication) getApplicationContext()).getDbHelper();
 
         rvAyahs.setLayoutManager(new LinearLayoutManager(this));

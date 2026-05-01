@@ -35,6 +35,9 @@ public class Ayah_Data {
     @SerializedName("surah")
     private Surah_Metadata surah;
 
+    @SerializedName("audio")
+    private String audioUrl;
+
     private String translation;
 
     private boolean isBookmarked;
@@ -52,6 +55,7 @@ public class Ayah_Data {
     public Surah_Metadata getSurah() { return surah; }
     public String getTranslation() { return translation; }
     public boolean isBookmarked() { return isBookmarked; }
+    public String getAudioUrl() { return audioUrl; }
 
     // Setters
     public void setGlobalVerseNumber(int globalVerseNumber) { this.globalVerseNumber = globalVerseNumber; }
@@ -66,4 +70,5 @@ public class Ayah_Data {
     public void setSurah(Surah_Metadata surah) { this.surah = surah; }
     public void setTranslation(String translation) { this.translation = translation; }
     public void setBookmarked(boolean bookmarked) { isBookmarked = bookmarked; }
+    public void setAudioUrl(String audioUrl) { this.audioUrl = audioUrl; }
 }

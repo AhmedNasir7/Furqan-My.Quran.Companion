@@ -41,7 +41,7 @@
             android:textColor="@color/secondary"
             android:layout_height="wrap_content"
             android:fontFamily="@font/plus_jakarta_sans"
-            android:text="@string/Bismillah_Spash_Text"
+            android:text="@string/Bismillah_Splash_Text"
             android:textSize="15sp"
             android:textStyle="bold"/>
         <com.airbnb.lottie.LottieAnimationView

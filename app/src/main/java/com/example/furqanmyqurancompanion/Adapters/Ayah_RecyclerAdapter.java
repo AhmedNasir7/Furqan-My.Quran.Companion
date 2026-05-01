@@ -1,6 +1,7 @@
 package com.example.furqanmyqurancompanion.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.furqanmyqurancompanion.Activities.TafseerActivity;
 import com.example.furqanmyqurancompanion.Database.DatabaseHelper;
 import com.example.furqanmyqurancompanion.Model.Ayah_Data;
 import com.example.furqanmyqurancompanion.Model.MyApplication;
@@ -69,6 +71,13 @@ public class Ayah_RecyclerAdapter extends RecyclerView.Adapter<Ayah_RecyclerAdap
                 Toast.makeText(context, "Removed from bookmarks", Toast.LENGTH_SHORT).show();
             }
         });
+
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, TafseerActivity.class);
+            intent.putExtra("ayah_global_id", ayah.getGlobalVerseNumber());
+            context.startActivity(intent);
+        });
+
 
         if (ayah.getVerseNumber() == 1) {
             if (ayah.getSurah() != null) {

@@ -144,7 +144,7 @@ public class ReadPage extends AppCompatActivity {
                         Surah_Data englishSurah = surahs.get(1);
 
                         ayahList.clear();
-                        String bismillah = getString(R.string.Bismillah_Spash_Text);
+                        String bismillah = getString(R.string.Bismillah_Splash_Text);
                         for (int m = 0; m < arabicSurah.getAyahs().size(); m++) {
                             Ayah_Data ayah = arabicSurah.getAyahs().get(m);
                             String text = ayah.getArabicText();
@@ -202,7 +202,7 @@ public class ReadPage extends AppCompatActivity {
                         Juz_Data englishJuz = juzs.get(1);
 
                         ayahList.clear();
-                        String bismillah = getString(R.string.Bismillah_Spash_Text);
+                        String bismillah = getString(R.string.Bismillah_Splash_Text);
                         for (int k = 0; k < arabicJuz.getAyahs().size(); k++) {
                             Ayah_Data ayah = arabicJuz.getAyahs().get(k);
                             String text = ayah.getArabicText();
@@ -246,16 +246,22 @@ public class ReadPage extends AppCompatActivity {
         MyApplication application = (MyApplication) getApplicationContext();
         android.database.Cursor cursor = application.getDbHelper().getReadingProgress(application.getCurrentUserId());
         if (cursor.moveToFirst()) {
-            String type = cursor.getString(1);
-            int id = cursor.getInt(2);
-            int lastAyahGlobalId = cursor.getInt(3);
+            int typeIndex = cursor.getColumnIndex("type");
+            int idIndex = cursor.getColumnIndex("id");
+            int ayahIdIndex = cursor.getColumnIndex("ayah_id");
 
-            if (currentType.equals(type) && currentId == id) {
-                for (int i = 0; i < ayahList.size(); i++) {
-                    if (ayahList.get(i).getGlobalVerseNumber() == lastAyahGlobalId) {
-                        final int position = i;
-                        rvAyahs.post(() -> rvAyahs.scrollToPosition(position));
-                        break;
+            if (typeIndex != -1 && idIndex != -1 && ayahIdIndex != -1) {
+                String type = cursor.getString(typeIndex);
+                int id = cursor.getInt(idIndex);
+                int lastAyahGlobalId = cursor.getInt(ayahIdIndex);
+
+                if (currentType.equals(type) && currentId == id) {
+                    for (int i = 0; i < ayahList.size(); i++) {
+                        if (ayahList.get(i).getGlobalVerseNumber() == lastAyahGlobalId) {
+                            final int position = i;
+                            rvAyahs.post(() -> rvAyahs.scrollToPosition(position));
+                            break;
+                        }
                     }
                 }
             }

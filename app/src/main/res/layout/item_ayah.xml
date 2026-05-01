@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="24dp"
-        android:text="بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ"
+        android:text="@string/Bismillah_Splash_Text"
         android:textColor="@color/primary"
         android:textSize="26sp"
         android:visibility="gone" />

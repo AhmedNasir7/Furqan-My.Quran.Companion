@@ -161,13 +161,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_SURAHS + " ORDER BY " + COL_SURAH_ID + " ASC", null);
         if (cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndex(COL_SURAH_ID);
+            int arabicNameIndex = cursor.getColumnIndex(COL_SURAH_ARABIC_NAME);
+            int englishNameIndex = cursor.getColumnIndex(COL_SURAH_ENGLISH_NAME);
+            int englishMeaningIndex = cursor.getColumnIndex(COL_SURAH_ENGLISH_MEANING);
+            int ayahCountIndex = cursor.getColumnIndex(COL_SURAH_AYAH_COUNT);
+
             do {
                 Surah_Metadata surah = new Surah_Metadata(
-                        cursor.getInt(0),
-                        cursor.getString(1),
-                        cursor.getString(2),
-                        cursor.getString(3),
-                        cursor.getInt(4)
+                        cursor.getInt(idIndex),
+                        cursor.getString(arabicNameIndex),
+                        cursor.getString(englishNameIndex),
+                        cursor.getString(englishMeaningIndex),
+                        cursor.getInt(ayahCountIndex)
                 );
                 list.add(surah);
             } while (cursor.moveToNext());
@@ -204,19 +210,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         Cursor cursor = db.rawQuery(query, new String[]{userId, String.valueOf(surahId)});
         if (cursor.moveToFirst()) {
+            int globalIdIndex = cursor.getColumnIndex(COL_AYAH_GLOBAL_ID);
+            int numberInSurahIndex = cursor.getColumnIndex(COL_AYAH_NUMBER_IN_SURAH);
+            int arabicTextIndex = cursor.getColumnIndex(COL_AYAH_ARABIC_TEXT);
+            int translationIndex = cursor.getColumnIndex(COL_AYAH_TRANSLATION);
+            int juzIndex = cursor.getColumnIndex(COL_AYAH_JUZ);
+            int pageIndex = cursor.getColumnIndex(COL_AYAH_PAGE);
+            int manzilIndex = cursor.getColumnIndex(COL_AYAH_MANZIL);
+            int rukuIndex = cursor.getColumnIndex(COL_AYAH_RUKU);
+            int hizbIndex = cursor.getColumnIndex(COL_AYAH_HIZB);
+            int sajdaIndex = cursor.getColumnIndex(COL_AYAH_SAJDA);
+            int bookmarkedIndex = cursor.getColumnIndex("is_bookmarked");
+
             do {
                 Ayah_Data ayah = new Ayah_Data();
-                ayah.setGlobalVerseNumber(cursor.getInt(0));
-                ayah.setVerseNumber(cursor.getInt(2));
-                ayah.setArabicText(cursor.getString(3));
-                ayah.setTranslation(cursor.getString(4));
-                ayah.setJuzNumber(cursor.getInt(5));
-                ayah.setPageNumber(cursor.getInt(6));
-                ayah.setManzilNumber(cursor.getInt(7));
-                ayah.setRukuNumber(cursor.getInt(8));
-                ayah.setHizbQuarter(cursor.getInt(9));
-                ayah.setIsSajda(cursor.getInt(10) == 1);
-                ayah.setBookmarked(cursor.getInt(11) == 1);
+                ayah.setGlobalVerseNumber(cursor.getInt(globalIdIndex));
+                ayah.setVerseNumber(cursor.getInt(numberInSurahIndex));
+                ayah.setArabicText(cursor.getString(arabicTextIndex));
+                ayah.setTranslation(cursor.getString(translationIndex));
+                ayah.setJuzNumber(cursor.getInt(juzIndex));
+                ayah.setPageNumber(cursor.getInt(pageIndex));
+                ayah.setManzilNumber(cursor.getInt(manzilIndex));
+                ayah.setRukuNumber(cursor.getInt(rukuIndex));
+                ayah.setHizbQuarter(cursor.getInt(hizbIndex));
+                ayah.setIsSajda(cursor.getInt(sajdaIndex) == 1);
+                ayah.setBookmarked(bookmarkedIndex != -1 && !cursor.isNull(bookmarkedIndex) && cursor.getInt(bookmarkedIndex) == 1);
                 list.add(ayah);
             } while (cursor.moveToNext());
         }
@@ -235,19 +253,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         Cursor cursor = db.rawQuery(query, new String[]{userId, String.valueOf(juzId)});
         if (cursor.moveToFirst()) {
+            int globalIdIndex = cursor.getColumnIndex(COL_AYAH_GLOBAL_ID);
+            int numberInSurahIndex = cursor.getColumnIndex(COL_AYAH_NUMBER_IN_SURAH);
+            int arabicTextIndex = cursor.getColumnIndex(COL_AYAH_ARABIC_TEXT);
+            int translationIndex = cursor.getColumnIndex(COL_AYAH_TRANSLATION);
+            int juzIndex = cursor.getColumnIndex(COL_AYAH_JUZ);
+            int pageIndex = cursor.getColumnIndex(COL_AYAH_PAGE);
+            int manzilIndex = cursor.getColumnIndex(COL_AYAH_MANZIL);
+            int rukuIndex = cursor.getColumnIndex(COL_AYAH_RUKU);
+            int hizbIndex = cursor.getColumnIndex(COL_AYAH_HIZB);
+            int sajdaIndex = cursor.getColumnIndex(COL_AYAH_SAJDA);
+            int bookmarkedIndex = cursor.getColumnIndex("is_bookmarked");
+
             do {
                 Ayah_Data ayah = new Ayah_Data();
-                ayah.setGlobalVerseNumber(cursor.getInt(0));
-                ayah.setVerseNumber(cursor.getInt(2));
-                ayah.setArabicText(cursor.getString(3));
-                ayah.setTranslation(cursor.getString(4));
-                ayah.setJuzNumber(cursor.getInt(5));
-                ayah.setPageNumber(cursor.getInt(6));
-                ayah.setManzilNumber(cursor.getInt(7));
-                ayah.setRukuNumber(cursor.getInt(8));
-                ayah.setHizbQuarter(cursor.getInt(9));
-                ayah.setIsSajda(cursor.getInt(10) == 1);
-                ayah.setBookmarked(cursor.getInt(11) == 1);
+                ayah.setGlobalVerseNumber(cursor.getInt(globalIdIndex));
+                ayah.setVerseNumber(cursor.getInt(numberInSurahIndex));
+                ayah.setArabicText(cursor.getString(arabicTextIndex));
+                ayah.setTranslation(cursor.getString(translationIndex));
+                ayah.setJuzNumber(cursor.getInt(juzIndex));
+                ayah.setPageNumber(cursor.getInt(pageIndex));
+                ayah.setManzilNumber(cursor.getInt(manzilIndex));
+                ayah.setRukuNumber(cursor.getInt(rukuIndex));
+                ayah.setHizbQuarter(cursor.getInt(hizbIndex));
+                ayah.setIsSajda(cursor.getInt(sajdaIndex) == 1);
+                ayah.setBookmarked(bookmarkedIndex != -1 && !cursor.isNull(bookmarkedIndex) && cursor.getInt(bookmarkedIndex) == 1);
                 list.add(ayah);
             } while (cursor.moveToNext());
         }
@@ -297,28 +327,45 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         
         Cursor cursor = db.rawQuery(query, new String[]{userId});
         if (cursor.moveToFirst()) {
+            int globalIdIndex = cursor.getColumnIndex(COL_AYAH_GLOBAL_ID);
+            int surahIdIndex = cursor.getColumnIndex(COL_AYAH_SURAH_ID);
+            int numberInSurahIndex = cursor.getColumnIndex(COL_AYAH_NUMBER_IN_SURAH);
+            int arabicTextIndex = cursor.getColumnIndex(COL_AYAH_ARABIC_TEXT);
+            int translationIndex = cursor.getColumnIndex(COL_AYAH_TRANSLATION);
+            int juzIndex = cursor.getColumnIndex(COL_AYAH_JUZ);
+            int pageIndex = cursor.getColumnIndex(COL_AYAH_PAGE);
+            int manzilIndex = cursor.getColumnIndex(COL_AYAH_MANZIL);
+            int rukuIndex = cursor.getColumnIndex(COL_AYAH_RUKU);
+            int hizbIndex = cursor.getColumnIndex(COL_AYAH_HIZB);
+            int sajdaIndex = cursor.getColumnIndex(COL_AYAH_SAJDA);
+            
+            int sArabicNameIndex = cursor.getColumnIndex(COL_SURAH_ARABIC_NAME);
+            int sEnglishNameIndex = cursor.getColumnIndex(COL_SURAH_ENGLISH_NAME);
+            int sEnglishMeaningIndex = cursor.getColumnIndex(COL_SURAH_ENGLISH_MEANING);
+            int sAyahCountIndex = cursor.getColumnIndex(COL_SURAH_AYAH_COUNT);
+
             do {
                 Ayah_Data ayah = new Ayah_Data();
-                ayah.setGlobalVerseNumber(cursor.getInt(0));
-                int surahId = cursor.getInt(1);
-                ayah.setVerseNumber(cursor.getInt(2));
-                ayah.setArabicText(cursor.getString(3));
-                ayah.setTranslation(cursor.getString(4));
-                ayah.setJuzNumber(cursor.getInt(5));
-                ayah.setPageNumber(cursor.getInt(6));
-                ayah.setManzilNumber(cursor.getInt(7));
-                ayah.setRukuNumber(cursor.getInt(8));
-                ayah.setHizbQuarter(cursor.getInt(9));
-                ayah.setIsSajda(cursor.getInt(10) == 1);
+                ayah.setGlobalVerseNumber(cursor.getInt(globalIdIndex));
+                int surahId = cursor.getInt(surahIdIndex);
+                ayah.setVerseNumber(cursor.getInt(numberInSurahIndex));
+                ayah.setArabicText(cursor.getString(arabicTextIndex));
+                ayah.setTranslation(cursor.getString(translationIndex));
+                ayah.setJuzNumber(cursor.getInt(juzIndex));
+                ayah.setPageNumber(cursor.getInt(pageIndex));
+                ayah.setManzilNumber(cursor.getInt(manzilIndex));
+                ayah.setRukuNumber(cursor.getInt(rukuIndex));
+                ayah.setHizbQuarter(cursor.getInt(hizbIndex));
+                ayah.setIsSajda(cursor.getInt(sajdaIndex) == 1);
                 ayah.setBookmarked(true);
 
-                if (surahId != -1 && !cursor.isNull(12)) {
+                if (surahId != -1 && sArabicNameIndex != -1 && !cursor.isNull(sArabicNameIndex)) {
                     Surah_Metadata surah = new Surah_Metadata(
                             surahId,
-                            cursor.getString(12), // arabic_name
-                            cursor.getString(13), // english_name
-                            cursor.getString(14), // english_meaning
-                            cursor.getInt(15)     // ayah_count
+                            cursor.getString(sArabicNameIndex),
+                            cursor.getString(sEnglishNameIndex),
+                            cursor.getString(sEnglishMeaningIndex),
+                            cursor.getInt(sAyahCountIndex)
                     );
                     ayah.setSurah(surah);
                 }
@@ -368,14 +415,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ACTIVITY + " WHERE " + COL_ACTIVITY_USER_ID + " = ?", new String[]{userId});
 
         if (cursor.moveToFirst()) {
-            String lastDate = cursor.getString(3);
+            int lastDateIndex = cursor.getColumnIndex(COL_ACTIVITY_LAST_DATE);
+            int totalDaysIndex = cursor.getColumnIndex(COL_ACTIVITY_TOTAL_DAYS);
+            int currentStreakIndex = cursor.getColumnIndex(COL_ACTIVITY_CURRENT_STREAK);
+
+            String lastDate = cursor.getString(lastDateIndex);
             if (todayDate.equals(lastDate)) {
                 cursor.close();
                 return; // Already updated today
             }
 
-            int totalDays = cursor.getInt(1);
-            int currentStreak = cursor.getInt(2);
+            int totalDays = cursor.getInt(totalDaysIndex);
+            int currentStreak = cursor.getInt(currentStreakIndex);
 
             totalDays++;
             if (isYesterday) {

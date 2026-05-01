@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.furqanmyqurancompanion.Activities.BookmarksActivity;
 import com.example.furqanmyqurancompanion.Activities.MainActivity;
 import com.example.furqanmyqurancompanion.Activities.TasbeehCounterPage;
 import com.example.furqanmyqurancompanion.Database.DatabaseHelper;
@@ -23,15 +24,16 @@ import com.example.furqanmyqurancompanion.R;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.Objects;
 
 public class homeFragment extends Fragment {
 
     TextView greet_text_home_page,Juz_continue_Card , bookmark_card,Streak_Card, tvContinueReadingSurah;
     LinearLayout Continue_Reading_Button, Read_Quran_Quick_Access, Listen_Quran_Quick_Access , Namaz_Quick_Access ,Tasbeeh_counter_Quick_Access, Bookmark_Card_Layout;
     DatabaseHelper dbHelper;
-    private String lastType;
-    private int lastId;
-    private int lastAyahGlobalId;
+    String lastType;
+    int lastId;
+    int lastAyahGlobalId;
 
     public homeFragment() {
         // Required empty public constructor
@@ -54,7 +56,8 @@ public class homeFragment extends Fragment {
     }
 
     private void checkUserStatus() {
-        if (getActivity() == null) return;
+        if (getActivity() == null)
+            return;
         MyApplication application = (MyApplication) getActivity().getApplicationContext();
         if (application.isGuest()) {
             Bookmark_Card_Layout.setEnabled(false);
@@ -65,10 +68,10 @@ public class homeFragment extends Fragment {
                 ((View) Streak_Card.getParent()).setEnabled(false);
                 ((View) Streak_Card.getParent()).setAlpha(0.5f);
             }
-            bookmark_card.setText("Login to use");
-            Streak_Card.setText("Login to use");
+            bookmark_card.setText(R.string.login_to_use);
+            Streak_Card.setText(R.string.login_to_use);
             if (tvContinueReadingSurah != null) {
-                tvContinueReadingSurah.setText("Login to use");
+                tvContinueReadingSurah.setText(R.string.login_to_use);
             }
         } else {
             Bookmark_Card_Layout.setEnabled(true);
@@ -91,7 +94,7 @@ public class homeFragment extends Fragment {
         String userId = application.getCurrentUserId();
 
         // Calculate dates
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        SimpleDateFormat sdf = new SimpleDateFormat(getString(R.string.date_format), Locale.getDefault());
         Calendar cal = Calendar.getInstance();
         String today = sdf.format(cal.getTime());
 
@@ -102,9 +105,12 @@ public class homeFragment extends Fragment {
         Cursor cursor = dbHelper.getActivity(userId);
         boolean isYesterday = false;
         if (cursor.moveToFirst()) {
-            String lastDate = cursor.getString(3);
-            if (yesterday.equals(lastDate)) {
-                isYesterday = true;
+            int lastDateIndex = cursor.getColumnIndex("last_date");
+            if (lastDateIndex != -1) {
+                String lastDate = cursor.getString(lastDateIndex);
+                if (yesterday.equals(lastDate)) {
+                    isYesterday = true;
+                }
             }
         }
         cursor.close();
@@ -114,8 +120,11 @@ public class homeFragment extends Fragment {
         // Update UI
         Cursor activityCursor = dbHelper.getActivity(userId);
         if (activityCursor.moveToFirst()) {
-            int currentStreak = activityCursor.getInt(2);
-            Streak_Card.setText(currentStreak + " Days");
+            int streakIndex = activityCursor.getColumnIndex("current_streak");
+            if (streakIndex != -1) {
+                int currentStreak = activityCursor.getInt(streakIndex);
+                Streak_Card.setText(currentStreak + " Days");
+            }
         }
         activityCursor.close();
     }
@@ -129,9 +138,13 @@ public class homeFragment extends Fragment {
         Cursor cursor = dbHelper.getReadingProgress(application.getCurrentUserId());
 
         if (cursor.moveToFirst()) {
-            lastType = cursor.getString(1); // type
-            lastId = cursor.getInt(2);     // id
-            lastAyahGlobalId = cursor.getInt(3); // ayah_id
+            int typeIndex = cursor.getColumnIndex("type");
+            int idIndex = cursor.getColumnIndex("id");
+            int ayahIdIndex = cursor.getColumnIndex("ayah_id");
+
+            if (typeIndex != -1) lastType = cursor.getString(typeIndex); // type
+            if (idIndex != -1) lastId = cursor.getInt(idIndex);     // id
+            if (ayahIdIndex != -1) lastAyahGlobalId = cursor.getInt(ayahIdIndex); // ayah_id
 
             if ("surah".equals(lastType)) {
                 // Find surah name from metadata
@@ -186,7 +199,7 @@ public class homeFragment extends Fragment {
         });
 
         Bookmark_Card_Layout.setOnClickListener(v -> {
-            startActivity(new Intent(getContext(), com.example.furqanmyqurancompanion.Activities.BookmarksActivity.class));
+            startActivity(new Intent(getContext(), BookmarksActivity.class));
         });
 
         Continue_Reading_Button.setOnClickListener(v -> {
@@ -209,16 +222,13 @@ public class homeFragment extends Fragment {
     public void init()
     {
         assert getView() != null;
-        dbHelper = ((MyApplication) getActivity().getApplicationContext()).getDbHelper();
+        dbHelper = ((MyApplication) requireActivity().getApplicationContext()).getDbHelper();
         greet_text_home_page=getView().findViewById(R.id.greet_text_home_page);
         Juz_continue_Card=getView().findViewById(R.id.Juz_Continue_Card);
         Streak_Card=getView().findViewById(R.id.Streak_card);
         bookmark_card=getView().findViewById(R.id.Bookmarks_card);
-        tvContinueReadingSurah = getView().findViewById(R.id.tvContinueReadingSurah); // I need to make sure this ID exists in XML
-        if (tvContinueReadingSurah == null) {
-            // Fallback: look for the textview with "Surah Al-Kahf" in the fragment_home.xml
-            // Based on the XML provided, it doesn't have an ID. I should add it.
-        }
+        tvContinueReadingSurah = getView().findViewById(R.id.tvContinueReadingSurah);
+
 
         Tasbeeh_counter_Quick_Access=getView().findViewById(R.id.Tasbeeh_counter_Quick_Access);
         Listen_Quran_Quick_Access=getView().findViewById(R.id.Listen_Quran_Quick_Access);
