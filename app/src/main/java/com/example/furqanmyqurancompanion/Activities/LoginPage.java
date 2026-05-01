@@ -25,7 +25,7 @@ public class LoginPage extends AppCompatActivity {
 
     TextInputEditText etLoginEmail , etLoginPassword;
     MaterialButton login_button;
-    TextView signup_page_nav;
+    TextView signup_page_nav, guest_mode_nav;
 
     FirebaseAuth fb_auth;
 
@@ -47,6 +47,17 @@ public class LoginPage extends AppCompatActivity {
 
         signup_page_nav.setOnClickListener(v->{
             startActivity(new Intent(LoginPage.this, SignUpPage.class));
+            finish();
+        });
+
+        guest_mode_nav.setOnClickListener(v -> {
+            SharedPreferences sPref = getSharedPreferences("user", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sPref.edit();
+            editor.putBoolean("isGuest", true);
+            editor.putBoolean("isLoggedIn", false);
+            editor.apply();
+
+            startActivity(new Intent(LoginPage.this, MainActivity.class));
             finish();
         });
 
@@ -86,6 +97,7 @@ public class LoginPage extends AppCompatActivity {
         etLoginPassword=findViewById(R.id.etLoginPassword);
         login_button=findViewById(R.id.btnLogin);
         signup_page_nav=findViewById(R.id.tvSignUp);
+        guest_mode_nav = findViewById(R.id.tvGuestMode);
         fb_auth = FirebaseAuth.getInstance();
     }
 }

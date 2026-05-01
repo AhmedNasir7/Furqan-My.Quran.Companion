@@ -9,6 +9,8 @@ import com.example.furqanmyqurancompanion.Database.DatabaseHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import android.content.SharedPreferences;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,12 +80,20 @@ public class MyApplication extends Application {
         }).start();
     }
 
+    public boolean isGuest() {
+        SharedPreferences spref = getSharedPreferences("user", MODE_PRIVATE);
+        return spref.getBoolean("isGuest", false);
+    }
+
     public String getCurrentUserId() {
+        if (isGuest()) {
+            return "guest_user";
+        }
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user != null) {
             return user.getUid();
         }
-        return "guest"; // Fallback for guest mode if any
+        return "guest_user"; // Default to guest if not logged in
     }
 
     public DatabaseHelper getDbHelper() {

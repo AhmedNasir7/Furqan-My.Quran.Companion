@@ -40,6 +40,8 @@ public class ReadPage extends AppCompatActivity {
     Ayah_RecyclerAdapter adapter;
     List<Ayah_Data> ayahList = new ArrayList<>();
     ImageView btnMenu;
+    private String currentType; // "surah" or "juz"
+    private int currentId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,15 +71,44 @@ public class ReadPage extends AppCompatActivity {
         btnMenu.setOnClickListener(v -> finish());
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        saveProgress();
+    }
+
+    private void saveProgress() {
+        if (ayahList == null || ayahList.isEmpty()) return;
+
+        LinearLayoutManager layoutManager = (LinearLayoutManager) rvAyahs.getLayoutManager();
+        if (layoutManager != null) {
+            int firstVisiblePosition = layoutManager.findFirstVisibleItemPosition();
+            if (firstVisiblePosition != RecyclerView.NO_POSITION) {
+                Ayah_Data lastReadAyah = ayahList.get(firstVisiblePosition);
+                MyApplication application = (MyApplication) getApplicationContext();
+                application.getDbHelper().updateReadingProgress(
+                        application.getCurrentUserId(),
+                        currentType,
+                        currentId,
+                        lastReadAyah.getGlobalVerseNumber()
+                );
+            }
+        }
+    }
+
     private void loadContent() {
         MyApplication application = (MyApplication) getApplicationContext();
         String surahNum = application.getSurah_Clicked();
         String juzNum = application.getJuz_Clicked();
 
         if (surahNum != null) {
-            fetchSurah(Integer.parseInt(surahNum));
+            currentType = "surah";
+            currentId = Integer.parseInt(surahNum);
+            fetchSurah(currentId);
         } else if (juzNum != null) {
-            fetchJuz(Integer.parseInt(juzNum));
+            currentType = "juz";
+            currentId = Integer.parseInt(juzNum);
+            fetchJuz(currentId);
         }
     }
 
@@ -98,6 +129,7 @@ public class ReadPage extends AppCompatActivity {
                 }
             }
             adapter.notifyDataSetChanged();
+            scrollToLastPosition();
             return;
         }
 
@@ -132,6 +164,7 @@ public class ReadPage extends AppCompatActivity {
                         }
                         tvReadPageTitle.setText(arabicSurah.getEnglishName() + "\nSurah " + arabicSurah.getSurahNumber());
                         adapter.notifyDataSetChanged();
+                        scrollToLastPosition();
                     }
                 }
             }
@@ -154,6 +187,7 @@ public class ReadPage extends AppCompatActivity {
             ayahList.addAll(cachedAyahs);
             tvReadPageTitle.setText("Juz " + num);
             adapter.notifyDataSetChanged();
+            scrollToLastPosition();
             return;
         }
 
@@ -192,6 +226,7 @@ public class ReadPage extends AppCompatActivity {
                         }
                         tvReadPageTitle.setText("Juz " + num);
                         adapter.notifyDataSetChanged();
+                        scrollToLastPosition();
                     } else {
                         Toast.makeText(ReadPage.this, "Unexpected API response format", Toast.LENGTH_SHORT).show();
                     }
@@ -205,5 +240,26 @@ public class ReadPage extends AppCompatActivity {
                 Toast.makeText(ReadPage.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    private void scrollToLastPosition() {
+        MyApplication application = (MyApplication) getApplicationContext();
+        android.database.Cursor cursor = application.getDbHelper().getReadingProgress(application.getCurrentUserId());
+        if (cursor.moveToFirst()) {
+            String type = cursor.getString(1);
+            int id = cursor.getInt(2);
+            int lastAyahGlobalId = cursor.getInt(3);
+
+            if (currentType.equals(type) && currentId == id) {
+                for (int i = 0; i < ayahList.size(); i++) {
+                    if (ayahList.get(i).getGlobalVerseNumber() == lastAyahGlobalId) {
+                        final int position = i;
+                        rvAyahs.post(() -> rvAyahs.scrollToPosition(position));
+                        break;
+                    }
+                }
+            }
+        }
+        cursor.close();
     }
 }

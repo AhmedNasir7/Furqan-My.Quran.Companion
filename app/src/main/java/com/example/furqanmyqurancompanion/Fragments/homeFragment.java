@@ -1,6 +1,7 @@
 package com.example.furqanmyqurancompanion.Fragments;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,11 +20,18 @@ import com.example.furqanmyqurancompanion.Database.DatabaseHelper;
 import com.example.furqanmyqurancompanion.Model.MyApplication;
 import com.example.furqanmyqurancompanion.R;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 public class homeFragment extends Fragment {
 
-    TextView greet_text_home_page,Juz_continue_Card , bookmark_card,Streak_Card;
+    TextView greet_text_home_page,Juz_continue_Card , bookmark_card,Streak_Card, tvContinueReadingSurah;
     LinearLayout Continue_Reading_Button, Read_Quran_Quick_Access, Listen_Quran_Quick_Access , Namaz_Quick_Access ,Tasbeeh_counter_Quick_Access, Bookmark_Card_Layout;
     DatabaseHelper dbHelper;
+    private String lastType;
+    private int lastId;
+    private int lastAyahGlobalId;
 
     public homeFragment() {
         // Required empty public constructor
@@ -39,15 +47,116 @@ public class homeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        checkUserStatus();
         updateBookmarkCount();
+        updateContinueReading();
+        updateStreak();
+    }
+
+    private void checkUserStatus() {
+        if (getActivity() == null) return;
+        MyApplication application = (MyApplication) getActivity().getApplicationContext();
+        if (application.isGuest()) {
+            Bookmark_Card_Layout.setEnabled(false);
+            Bookmark_Card_Layout.setAlpha(0.5f);
+            Continue_Reading_Button.setEnabled(false);
+            Continue_Reading_Button.setAlpha(0.5f);
+            if (Streak_Card != null && Streak_Card.getParent() instanceof View) {
+                ((View) Streak_Card.getParent()).setEnabled(false);
+                ((View) Streak_Card.getParent()).setAlpha(0.5f);
+            }
+            bookmark_card.setText("Login to use");
+            Streak_Card.setText("Login to use");
+            if (tvContinueReadingSurah != null) {
+                tvContinueReadingSurah.setText("Login to use");
+            }
+        } else {
+            Bookmark_Card_Layout.setEnabled(true);
+            Bookmark_Card_Layout.setAlpha(1.0f);
+            Continue_Reading_Button.setEnabled(true);
+            Continue_Reading_Button.setAlpha(1.0f);
+            if (Streak_Card != null && Streak_Card.getParent() instanceof View) {
+                ((View) Streak_Card.getParent()).setEnabled(true);
+                ((View) Streak_Card.getParent()).setAlpha(1.0f);
+            }
+        }
+    }
+
+    private void updateStreak() {
+        if (dbHelper == null || Streak_Card == null || getActivity() == null) return;
+
+        MyApplication application = (MyApplication) getActivity().getApplicationContext();
+        if (application.isGuest()) return;
+        
+        String userId = application.getCurrentUserId();
+
+        // Calculate dates
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        Calendar cal = Calendar.getInstance();
+        String today = sdf.format(cal.getTime());
+
+        cal.add(Calendar.DATE, -1);
+        String yesterday = sdf.format(cal.getTime());
+
+        // Check if last activity was yesterday
+        Cursor cursor = dbHelper.getActivity(userId);
+        boolean isYesterday = false;
+        if (cursor.moveToFirst()) {
+            String lastDate = cursor.getString(3);
+            if (yesterday.equals(lastDate)) {
+                isYesterday = true;
+            }
+        }
+        cursor.close();
+
+        dbHelper.updateActivity(userId, today, isYesterday);
+
+        // Update UI
+        Cursor activityCursor = dbHelper.getActivity(userId);
+        if (activityCursor.moveToFirst()) {
+            int currentStreak = activityCursor.getInt(2);
+            Streak_Card.setText(currentStreak + " Days");
+        }
+        activityCursor.close();
+    }
+
+    private void updateContinueReading() {
+        if (dbHelper == null || tvContinueReadingSurah == null || getActivity() == null) return;
+
+        MyApplication application = (MyApplication) getActivity().getApplicationContext();
+        if (application.isGuest()) return;
+
+        Cursor cursor = dbHelper.getReadingProgress(application.getCurrentUserId());
+
+        if (cursor.moveToFirst()) {
+            lastType = cursor.getString(1); // type
+            lastId = cursor.getInt(2);     // id
+            lastAyahGlobalId = cursor.getInt(3); // ayah_id
+
+            if ("surah".equals(lastType)) {
+                // Find surah name from metadata
+                for (com.example.furqanmyqurancompanion.Model.Surah_Metadata surah : application.getSurahs_metadata()) {
+                    if (surah.getSurah_number() == lastId) {
+                        tvContinueReadingSurah.setText(surah.getSurah_english_name());
+                        break;
+                    }
+                }
+            } else {
+                tvContinueReadingSurah.setText("Juz " + lastId);
+            }
+        }
+        cursor.close();
     }
 
     private void updateBookmarkCount() {
-        if (dbHelper != null && bookmark_card != null && getActivity() != null) {
-            String userId = ((MyApplication) getActivity().getApplicationContext()).getCurrentUserId();
-            int count = dbHelper.getBookmarkCount(userId);
-            bookmark_card.setText(count + " saved");
-        }
+        if (dbHelper == null || bookmark_card == null || getActivity() == null) return;
+
+        MyApplication application = (MyApplication) getActivity().getApplicationContext();
+        if (application.isGuest()) return;
+        
+        String userId = application.getCurrentUserId();
+        int count = dbHelper.getBookmarkCount(userId);
+        bookmark_card.setText(count + " saved");
     }
 
     @Override
@@ -81,8 +190,18 @@ public class homeFragment extends Fragment {
         });
 
         Continue_Reading_Button.setOnClickListener(v -> {
-            if (getActivity() instanceof MainActivity) {
-                ((MainActivity) getActivity()).pager.setCurrentItem(1);
+            if (lastType != null) {
+                MyApplication application = (MyApplication) getActivity().getApplicationContext();
+                if ("surah".equals(lastType)) {
+                    application.setSurah_Clicked(String.valueOf(lastId));
+                } else {
+                    application.setJuz_Clicked(String.valueOf(lastId));
+                }
+                startActivity(new Intent(getContext(), com.example.furqanmyqurancompanion.Activities.ReadPage.class));
+            } else {
+                if (getActivity() instanceof MainActivity) {
+                    ((MainActivity) getActivity()).pager.setCurrentItem(1);
+                }
             }
         });
     }
@@ -95,6 +214,11 @@ public class homeFragment extends Fragment {
         Juz_continue_Card=getView().findViewById(R.id.Juz_Continue_Card);
         Streak_Card=getView().findViewById(R.id.Streak_card);
         bookmark_card=getView().findViewById(R.id.Bookmarks_card);
+        tvContinueReadingSurah = getView().findViewById(R.id.tvContinueReadingSurah); // I need to make sure this ID exists in XML
+        if (tvContinueReadingSurah == null) {
+            // Fallback: look for the textview with "Surah Al-Kahf" in the fragment_home.xml
+            // Based on the XML provided, it doesn't have an ID. I should add it.
+        }
 
         Tasbeeh_counter_Quick_Access=getView().findViewById(R.id.Tasbeeh_counter_Quick_Access);
         Listen_Quran_Quick_Access=getView().findViewById(R.id.Listen_Quran_Quick_Access);

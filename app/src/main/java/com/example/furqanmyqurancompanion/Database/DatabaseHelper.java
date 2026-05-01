@@ -15,7 +15,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "QuranCache.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 5;
 
     // Table Surahs
     private static final String TABLE_SURAHS = "surahs";
@@ -43,6 +43,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String TABLE_BOOKMARKS = "bookmarks";
     private static final String COL_BOOKMARK_USER_ID = "user_id";
     private static final String COL_BOOKMARK_AYAH_ID = "ayah_id";
+
+    // Table Progress (New)
+    private static final String TABLE_PROGRESS = "reading_progress";
+    private static final String COL_PROGRESS_USER_ID = "user_id";
+    private static final String COL_PROGRESS_TYPE = "type"; // "surah" or "juz"
+    private static final String COL_PROGRESS_ID = "id"; // surah number or juz number
+    private static final String COL_PROGRESS_AYAH_ID = "ayah_id"; // global_id of last read ayah
+    private static final String COL_PROGRESS_TIMESTAMP = "timestamp";
+
+    // Table User Activity (New)
+    private static final String TABLE_ACTIVITY = "user_activity";
+    private static final String COL_ACTIVITY_USER_ID = "user_id";
+    private static final String COL_ACTIVITY_TOTAL_DAYS = "total_days";
+    private static final String COL_ACTIVITY_CURRENT_STREAK = "current_streak";
+    private static final String COL_ACTIVITY_LAST_DATE = "last_date"; // Format: YYYY-MM-DD
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -78,9 +93,27 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "PRIMARY KEY (" + COL_BOOKMARK_USER_ID + ", " + COL_BOOKMARK_AYAH_ID + ")" +
                 ")";
 
+        String createProgressTable = "CREATE TABLE " + TABLE_PROGRESS + " (" +
+                COL_PROGRESS_USER_ID + " TEXT," +
+                COL_PROGRESS_TYPE + " TEXT," +
+                COL_PROGRESS_ID + " INTEGER," +
+                COL_PROGRESS_AYAH_ID + " INTEGER," +
+                COL_PROGRESS_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                "PRIMARY KEY (" + COL_PROGRESS_USER_ID + ")" +
+                ")";
+
+        String createActivityTable = "CREATE TABLE " + TABLE_ACTIVITY + " (" +
+                COL_ACTIVITY_USER_ID + " TEXT PRIMARY KEY," +
+                COL_ACTIVITY_TOTAL_DAYS + " INTEGER DEFAULT 0," +
+                COL_ACTIVITY_CURRENT_STREAK + " INTEGER DEFAULT 0," +
+                COL_ACTIVITY_LAST_DATE + " TEXT" +
+                ")";
+
         db.execSQL(createSurahTable);
         db.execSQL(createAyahTable);
         db.execSQL(createBookmarkTable);
+        db.execSQL(createProgressTable);
+        db.execSQL(createActivityTable);
     }
 
     @Override
@@ -91,9 +124,24 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                     COL_BOOKMARK_AYAH_ID + " INTEGER," +
                     "PRIMARY KEY (" + COL_BOOKMARK_USER_ID + ", " + COL_BOOKMARK_AYAH_ID + ")" +
                     ")");
-            // Optionally migrate data from ayahs.is_bookmarked if needed, 
-            // but we don't know the userId for existing bookmarks.
-            // For now, just drop the column from ayahs if possible, or just ignore it.
+        }
+        if (oldVersion < 4) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_PROGRESS + " (" +
+                    COL_PROGRESS_USER_ID + " TEXT," +
+                    COL_PROGRESS_TYPE + " TEXT," +
+                    COL_PROGRESS_ID + " INTEGER," +
+                    COL_PROGRESS_AYAH_ID + " INTEGER," +
+                    COL_PROGRESS_TIMESTAMP + " DATETIME DEFAULT CURRENT_TIMESTAMP," +
+                    "PRIMARY KEY (" + COL_PROGRESS_USER_ID + ")" +
+                    ")");
+        }
+        if (oldVersion < 5) {
+            db.execSQL("CREATE TABLE IF NOT EXISTS " + TABLE_ACTIVITY + " (" +
+                    COL_ACTIVITY_USER_ID + " TEXT PRIMARY KEY," +
+                    COL_ACTIVITY_TOTAL_DAYS + " INTEGER DEFAULT 0," +
+                    COL_ACTIVITY_CURRENT_STREAK + " INTEGER DEFAULT 0," +
+                    COL_ACTIVITY_LAST_DATE + " TEXT" +
+                    ")");
         }
     }
 
@@ -297,5 +345,63 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         boolean isBookmarked = cursor.moveToFirst();
         cursor.close();
         return isBookmarked;
+    }
+
+    public void updateReadingProgress(String userId, String type, int id, int lastAyahGlobalId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues values = new ContentValues();
+        values.put(COL_PROGRESS_USER_ID, userId);
+        values.put(COL_PROGRESS_TYPE, type);
+        values.put(COL_PROGRESS_ID, id);
+        values.put(COL_PROGRESS_AYAH_ID, lastAyahGlobalId);
+        values.put(COL_PROGRESS_TIMESTAMP, System.currentTimeMillis());
+        db.insertWithOnConflict(TABLE_PROGRESS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public Cursor getReadingProgress(String userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_PROGRESS + " WHERE " + COL_PROGRESS_USER_ID + " = ?", new String[]{userId});
+    }
+
+    public void updateActivity(String userId, String todayDate, boolean isYesterday) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_ACTIVITY + " WHERE " + COL_ACTIVITY_USER_ID + " = ?", new String[]{userId});
+
+        if (cursor.moveToFirst()) {
+            String lastDate = cursor.getString(3);
+            if (todayDate.equals(lastDate)) {
+                cursor.close();
+                return; // Already updated today
+            }
+
+            int totalDays = cursor.getInt(1);
+            int currentStreak = cursor.getInt(2);
+
+            totalDays++;
+            if (isYesterday) {
+                currentStreak++;
+            } else {
+                currentStreak = 1;
+            }
+
+            ContentValues values = new ContentValues();
+            values.put(COL_ACTIVITY_TOTAL_DAYS, totalDays);
+            values.put(COL_ACTIVITY_CURRENT_STREAK, currentStreak);
+            values.put(COL_ACTIVITY_LAST_DATE, todayDate);
+            db.update(TABLE_ACTIVITY, values, COL_ACTIVITY_USER_ID + " = ?", new String[]{userId});
+        } else {
+            ContentValues values = new ContentValues();
+            values.put(COL_ACTIVITY_USER_ID, userId);
+            values.put(COL_ACTIVITY_TOTAL_DAYS, 1);
+            values.put(COL_ACTIVITY_CURRENT_STREAK, 1);
+            values.put(COL_ACTIVITY_LAST_DATE, todayDate);
+            db.insert(TABLE_ACTIVITY, null, values);
+        }
+        cursor.close();
+    }
+
+    public Cursor getActivity(String userId) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        return db.rawQuery("SELECT * FROM " + TABLE_ACTIVITY + " WHERE " + COL_ACTIVITY_USER_ID + " = ?", new String[]{userId});
     }
 }
