@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.Demo">
         <activity
+            android:name=".Activities.BookmarksActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.ReadPage"
             android:exported="false" />
         <activity

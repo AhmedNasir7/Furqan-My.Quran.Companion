@@ -15,58 +15,20 @@ import android.widget.TextView;
 
 import com.example.furqanmyqurancompanion.Activities.MainActivity;
 import com.example.furqanmyqurancompanion.Activities.TasbeehCounterPage;
+import com.example.furqanmyqurancompanion.Database.DatabaseHelper;
+import com.example.furqanmyqurancompanion.Model.MyApplication;
 import com.example.furqanmyqurancompanion.R;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link homeFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class homeFragment extends Fragment {
 
     TextView greet_text_home_page,Juz_continue_Card , bookmark_card,Streak_Card;
-    LinearLayout Continue_Reading_Button, Read_Quran_Quick_Access, Listen_Quran_Quick_Access , Namaz_Quick_Access ,Tasbeeh_counter_Quick_Access;
-
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
-
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    LinearLayout Continue_Reading_Button, Read_Quran_Quick_Access, Listen_Quran_Quick_Access , Namaz_Quick_Access ,Tasbeeh_counter_Quick_Access, Bookmark_Card_Layout;
+    DatabaseHelper dbHelper;
 
     public homeFragment() {
         // Required empty public constructor
     }
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment homeFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static homeFragment newInstance(String param1, String param2) {
-        homeFragment fragment = new homeFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
-
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -75,10 +37,25 @@ public class homeFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        updateBookmarkCount();
+    }
+
+    private void updateBookmarkCount() {
+        if (dbHelper != null && bookmark_card != null && getActivity() != null) {
+            String userId = ((MyApplication) getActivity().getApplicationContext()).getCurrentUserId();
+            int count = dbHelper.getBookmarkCount(userId);
+            bookmark_card.setText(count + " saved");
+        }
+    }
+
+    @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
         init();
+        updateBookmarkCount();
 
         Listen_Quran_Quick_Access.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
@@ -99,6 +76,10 @@ public class homeFragment extends Fragment {
             startActivity(new Intent(getContext(), TasbeehCounterPage.class));
         });
 
+        Bookmark_Card_Layout.setOnClickListener(v -> {
+            startActivity(new Intent(getContext(), com.example.furqanmyqurancompanion.Activities.BookmarksActivity.class));
+        });
+
         Continue_Reading_Button.setOnClickListener(v -> {
             if (getActivity() instanceof MainActivity) {
                 ((MainActivity) getActivity()).pager.setCurrentItem(1);
@@ -109,6 +90,7 @@ public class homeFragment extends Fragment {
     public void init()
     {
         assert getView() != null;
+        dbHelper = ((MyApplication) getActivity().getApplicationContext()).getDbHelper();
         greet_text_home_page=getView().findViewById(R.id.greet_text_home_page);
         Juz_continue_Card=getView().findViewById(R.id.Juz_Continue_Card);
         Streak_Card=getView().findViewById(R.id.Streak_card);
@@ -119,5 +101,6 @@ public class homeFragment extends Fragment {
         Read_Quran_Quick_Access=getView().findViewById(R.id.Read_Quran_Quick_Access);
         Namaz_Quick_Access=getView().findViewById(R.id.Namaz_Quick_Access);
         Continue_Reading_Button=getView().findViewById(R.id.Continue_Reading_Button);
+        Bookmark_Card_Layout=getView().findViewById(R.id.Bookmark_Card_Layout);
     }
 }

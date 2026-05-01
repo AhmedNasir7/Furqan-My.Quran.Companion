@@ -34,10 +34,6 @@ public class SignUpPage extends AppCompatActivity {
     TextView login_page_nav;
 
     FirebaseFirestore database;
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

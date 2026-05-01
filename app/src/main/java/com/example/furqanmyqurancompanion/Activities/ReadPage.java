@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.furqanmyqurancompanion.Adapters.Ayah_RecyclerAdapter;
 import com.example.furqanmyqurancompanion.Api.Api_Client;
 import com.example.furqanmyqurancompanion.Api.QuranAPiService;
+import com.example.furqanmyqurancompanion.Database.DatabaseHelper;
 import com.example.furqanmyqurancompanion.Model.Ayah_Data;
 import com.example.furqanmyqurancompanion.Model.JuzResponse;
 import com.example.furqanmyqurancompanion.Model.Juz_Data;
@@ -81,6 +82,25 @@ public class ReadPage extends AppCompatActivity {
     }
 
     private void fetchSurah(int num) {
+        MyApplication application = (MyApplication) getApplicationContext();
+        DatabaseHelper dbHelper = application.getDbHelper();
+        String userId = application.getCurrentUserId();
+        List<Ayah_Data> cachedAyahs = dbHelper.getAyahsForSurah(num, userId);
+
+        if (!cachedAyahs.isEmpty()) {
+            ayahList.clear();
+            ayahList.addAll(cachedAyahs);
+            // We need to set the title correctly. We can get it from application's metadata list.
+            for (com.example.furqanmyqurancompanion.Model.Surah_Metadata metadata : application.getSurahs_metadata()) {
+                if (metadata.getSurah_number() == num) {
+                    tvReadPageTitle.setText(metadata.getSurah_english_name() + "\nSurah " + num);
+                    break;
+                }
+            }
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
         QuranAPiService apiService = Api_Client.getQuranApiService();
         apiService.getSurahWithTranslation(num).enqueue(new Callback<SurahContentResponse>() {
             @Override
@@ -92,7 +112,7 @@ public class ReadPage extends AppCompatActivity {
                         Surah_Data englishSurah = surahs.get(1);
 
                         ayahList.clear();
-                        String bismillah = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+                        String bismillah = getString(R.string.Bismillah_Spash_Text);
                         for (int m = 0; m < arabicSurah.getAyahs().size(); m++) {
                             Ayah_Data ayah = arabicSurah.getAyahs().get(m);
                             String text = ayah.getArabicText();
@@ -107,6 +127,8 @@ public class ReadPage extends AppCompatActivity {
 
                             ayah.setTranslation(englishSurah.getAyahs().get(m).getArabicText());
                             ayahList.add(ayah);
+                            // Cache it
+                            dbHelper.addAyah(ayah, num);
                         }
                         tvReadPageTitle.setText(arabicSurah.getEnglishName() + "\nSurah " + arabicSurah.getSurahNumber());
                         adapter.notifyDataSetChanged();
@@ -122,6 +144,19 @@ public class ReadPage extends AppCompatActivity {
     }
 
     private void fetchJuz(int num) {
+        MyApplication application = (MyApplication) getApplicationContext();
+        DatabaseHelper dbHelper = application.getDbHelper();
+        String userId = application.getCurrentUserId();
+        List<Ayah_Data> cachedAyahs = dbHelper.getAyahsForJuz(num, userId);
+
+        if (!cachedAyahs.isEmpty()) {
+            ayahList.clear();
+            ayahList.addAll(cachedAyahs);
+            tvReadPageTitle.setText("Juz " + num);
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
         QuranAPiService apiService = Api_Client.getQuranApiService();
         apiService.getJuzWithTranslation(num).enqueue(new Callback<JuzResponse>() {
             @Override
@@ -133,7 +168,7 @@ public class ReadPage extends AppCompatActivity {
                         Juz_Data englishJuz = juzs.get(1);
 
                         ayahList.clear();
-                        String bismillah = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ";
+                        String bismillah = getString(R.string.Bismillah_Spash_Text);
                         for (int k = 0; k < arabicJuz.getAyahs().size(); k++) {
                             Ayah_Data ayah = arabicJuz.getAyahs().get(k);
                             String text = ayah.getArabicText();
@@ -152,6 +187,8 @@ public class ReadPage extends AppCompatActivity {
 
                             ayah.setTranslation(englishJuz.getAyahs().get(k).getArabicText());
                             ayahList.add(ayah);
+                            int surahId = (ayah.getSurah() != null) ? ayah.getSurah().getSurah_number() : -1;
+                            dbHelper.addAyah(ayah, surahId);
                         }
                         tvReadPageTitle.setText("Juz " + num);
                         adapter.notifyDataSetChanged();

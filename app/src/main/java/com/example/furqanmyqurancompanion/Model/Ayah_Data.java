@@ -37,6 +37,8 @@ public class Ayah_Data {
 
     private String translation;
 
+    private boolean isBookmarked;
+
     // Getters
     public int getGlobalVerseNumber() { return globalVerseNumber; }
     public int getVerseNumber() { return verseNumber; }
@@ -49,6 +51,7 @@ public class Ayah_Data {
     public boolean isSajda() { return isSajda; }
     public Surah_Metadata getSurah() { return surah; }
     public String getTranslation() { return translation; }
+    public boolean isBookmarked() { return isBookmarked; }
 
     // Setters
     public void setGlobalVerseNumber(int globalVerseNumber) { this.globalVerseNumber = globalVerseNumber; }
@@ -62,4 +65,5 @@ public class Ayah_Data {
     public void setIsSajda(boolean isSajda) { this.isSajda = isSajda; }
     public void setSurah(Surah_Metadata surah) { this.surah = surah; }
     public void setTranslation(String translation) { this.translation = translation; }
+    public void setBookmarked(boolean bookmarked) { isBookmarked = bookmarked; }
 }
