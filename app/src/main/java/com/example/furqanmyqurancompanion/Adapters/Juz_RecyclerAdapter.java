@@ -52,6 +52,11 @@ public class Juz_RecyclerAdapter extends RecyclerView.Adapter<Juz_RecyclerAdapte
         return juz_list.size();
     }
 
+    public void updateList(List<Integer> newList) {
+        this.juz_list = newList;
+        notifyDataSetChanged();
+    }
+
     public static class Juz_View_holder extends RecyclerView.ViewHolder {
         TextView juz_number, juz_name_english, juz_description;
 

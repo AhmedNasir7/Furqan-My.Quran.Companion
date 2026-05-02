@@ -79,7 +79,7 @@ public class PrayerGuideListFragment extends Fragment {
         @NonNull
         @Override
         public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View v = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_1, parent, false);
+            View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_prayer_category, parent, false);
             return new VH(v);
         }
 
@@ -97,7 +97,7 @@ public class PrayerGuideListFragment extends Fragment {
             TextView tv;
             VH(@NonNull View v) {
                 super(v);
-                tv = v.findViewById(android.R.id.text1);
+                tv = v.findViewById(R.id.tvPrayerCategoryName);
             }
         }
     }

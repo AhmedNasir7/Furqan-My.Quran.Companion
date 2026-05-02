@@ -46,6 +46,7 @@ public class TafseerActivity extends AppCompatActivity {
         tvTafseer = findViewById(R.id.tvTafseer);
         tvAyahArabic = findViewById(R.id.tvAyahArabic);
         tvAyahTranslation = findViewById(R.id.tvAyahTranslation);
+        findViewById(R.id.btnBackTafseer).setOnClickListener(v -> finish());
     }
 
     private void fetchTafseer() {

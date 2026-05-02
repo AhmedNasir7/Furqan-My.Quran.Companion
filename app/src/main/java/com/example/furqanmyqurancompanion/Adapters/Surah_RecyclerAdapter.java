@@ -54,6 +54,11 @@ public class Surah_RecyclerAdapter  extends   RecyclerView.Adapter<Surah_Recycle
         return list.size();
     }
 
+    public void updateList(List<Surah_Metadata> newList) {
+        this.list = newList;
+        notifyDataSetChanged();
+    }
+
     public class Surah_View_holder extends RecyclerView.ViewHolder{
 
         TextView surah_number, surah_english_name , surah_arabic_name , surah_english_meaning_verses;

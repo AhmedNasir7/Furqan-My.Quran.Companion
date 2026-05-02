@@ -20,4 +20,10 @@
     <color name="error">#D9534F</color>
 
     <color name="divider">#E0E6E9</color>
+
+    <color name="intensity_0">#FAF8F2</color>
+    <color name="intensity_1">#E2ECE8</color>
+    <color name="intensity_2">#A5C4B9</color>
+    <color name="intensity_3">#6B9B88</color>
+    <color name="intensity_4">#4A7C6B</color>
 </resources>

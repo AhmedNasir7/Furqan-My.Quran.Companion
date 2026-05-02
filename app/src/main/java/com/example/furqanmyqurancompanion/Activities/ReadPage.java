@@ -26,12 +26,30 @@ import com.example.furqanmyqurancompanion.Model.SurahContentResponse;
 import com.example.furqanmyqurancompanion.Model.Surah_Data;
 import com.example.furqanmyqurancompanion.R;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+
+import com.example.furqanmyqurancompanion.Model.DeepSearchService;
+import com.google.ai.client.generativeai.type.GenerateContentResponse;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.json.JSONArray;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class ReadPage extends AppCompatActivity {
 
@@ -39,9 +57,15 @@ public class ReadPage extends AppCompatActivity {
     RecyclerView rvAyahs;
     Ayah_RecyclerAdapter adapter;
     List<Ayah_Data> ayahList = new ArrayList<>();
+    List<Ayah_Data> fullAyahList = new ArrayList<>();
     ImageView btnMenu;
     private String currentType; // "surah" or "juz"
     private int currentId;
+    EditText et_ayah_search;
+    ProgressBar ayahSearchProgress;
+    DeepSearchService deepSearchService;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,12 +87,95 @@ public class ReadPage extends AppCompatActivity {
         tvReadPageTitle = findViewById(R.id.tvReadPageTitle);
         rvAyahs = findViewById(R.id.rvAyahs);
         btnMenu = findViewById(R.id.btnMenu);
+        et_ayah_search = findViewById(R.id.et_ayah_search);
+        ayahSearchProgress = findViewById(R.id.ayahSearchProgress);
 
         rvAyahs.setLayoutManager(new LinearLayoutManager(this));
         adapter = new Ayah_RecyclerAdapter(this, ayahList);
         rvAyahs.setAdapter(adapter);
 
         btnMenu.setOnClickListener(v -> finish());
+        setupSearch();
+    }
+
+    private void setupSearch() {
+        deepSearchService = new DeepSearchService();
+        et_ayah_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> performAyahSearch(s.toString());
+                searchHandler.postDelayed(searchRunnable, 600);
+            }
+        });
+    }
+
+    private void performAyahSearch(String query) {
+        if (query.isEmpty()) {
+            ayahList.clear();
+            ayahList.addAll(fullAyahList);
+            adapter.notifyDataSetChanged();
+            return;
+        }
+
+        List<Ayah_Data> filtered = fullAyahList.stream()
+                .filter(a -> a.getTranslation().toLowerCase().contains(query.toLowerCase()) ||
+                        String.valueOf(a.getVerseNumber()).equals(query))
+                .collect(Collectors.toList());
+
+        if (filtered.isEmpty() && query.length() > 5) {
+            performDeepAyahSearch(query);
+        } else {
+            ayahList.clear();
+            ayahList.addAll(filtered);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
+    private void performDeepAyahSearch(String query) {
+        ayahSearchProgress.setVisibility(View.VISIBLE);
+        ListenableFuture<GenerateContentResponse> future = deepSearchService.search(query, "Ayah in " + currentType + " " + currentId);
+
+        Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
+            @Override
+            public void onSuccess(GenerateContentResponse result) {
+                runOnUiThread(() -> {
+                    ayahSearchProgress.setVisibility(View.GONE);
+                    try {
+                        String json = result.getText();
+                        if (json != null) {
+                            if (json.contains("[") && json.contains("]")) {
+                                json = json.substring(json.indexOf("["), json.lastIndexOf("]") + 1);
+                            }
+                            JSONArray array = new JSONArray(json);
+                            List<Integer> ids = new ArrayList<>();
+                            for (int i = 0; i < array.length(); i++) {
+                                ids.add(array.getJSONObject(i).getInt("id"));
+                            }
+                            
+                            List<Ayah_Data> deepResults = fullAyahList.stream()
+                                    .filter(a -> ids.contains(a.getGlobalVerseNumber()) || ids.contains(a.getVerseNumber()))
+                                    .collect(Collectors.toList());
+                            
+                            ayahList.clear();
+                            ayahList.addAll(deepResults);
+                            adapter.notifyDataSetChanged();
+                        }
+                    } catch (Exception e) {
+                        Log.e("ReadPage", "Deep ayah search error", e);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                runOnUiThread(() -> ayahSearchProgress.setVisibility(View.GONE));
+            }
+        }, Executors.newSingleThreadExecutor());
     }
 
     @Override
@@ -119,8 +226,10 @@ public class ReadPage extends AppCompatActivity {
         List<Ayah_Data> cachedAyahs = dbHelper.getAyahsForSurah(num, userId);
 
         if (!cachedAyahs.isEmpty()) {
+            fullAyahList.clear();
+            fullAyahList.addAll(cachedAyahs);
             ayahList.clear();
-            ayahList.addAll(cachedAyahs);
+            ayahList.addAll(fullAyahList);
             // We need to set the title correctly. We can get it from application's metadata list.
             for (com.example.furqanmyqurancompanion.Model.Surah_Metadata metadata : application.getSurahs_metadata()) {
                 if (metadata.getSurah_number() == num) {
@@ -143,7 +252,7 @@ public class ReadPage extends AppCompatActivity {
                         Surah_Data arabicSurah = surahs.get(0);
                         Surah_Data englishSurah = surahs.get(1);
 
-                        ayahList.clear();
+                        fullAyahList.clear();
                         String bismillah = getString(R.string.Bismillah_Splash_Text);
                         for (int m = 0; m < arabicSurah.getAyahs().size(); m++) {
                             Ayah_Data ayah = arabicSurah.getAyahs().get(m);
@@ -158,10 +267,12 @@ public class ReadPage extends AppCompatActivity {
                             }
 
                             ayah.setTranslation(englishSurah.getAyahs().get(m).getArabicText());
-                            ayahList.add(ayah);
+                            fullAyahList.add(ayah);
                             // Cache it
                             dbHelper.addAyah(ayah, num);
                         }
+                        ayahList.clear();
+                        ayahList.addAll(fullAyahList);
                         tvReadPageTitle.setText(arabicSurah.getEnglishName() + "\nSurah " + arabicSurah.getSurahNumber());
                         adapter.notifyDataSetChanged();
                         scrollToLastPosition();
@@ -183,8 +294,10 @@ public class ReadPage extends AppCompatActivity {
         List<Ayah_Data> cachedAyahs = dbHelper.getAyahsForJuz(num, userId);
 
         if (!cachedAyahs.isEmpty()) {
+            fullAyahList.clear();
+            fullAyahList.addAll(cachedAyahs);
             ayahList.clear();
-            ayahList.addAll(cachedAyahs);
+            ayahList.addAll(fullAyahList);
             tvReadPageTitle.setText("Juz " + num);
             adapter.notifyDataSetChanged();
             scrollToLastPosition();
@@ -201,7 +314,7 @@ public class ReadPage extends AppCompatActivity {
                         Juz_Data arabicJuz = juzs.get(0);
                         Juz_Data englishJuz = juzs.get(1);
 
-                        ayahList.clear();
+                        fullAyahList.clear();
                         String bismillah = getString(R.string.Bismillah_Splash_Text);
                         for (int k = 0; k < arabicJuz.getAyahs().size(); k++) {
                             Ayah_Data ayah = arabicJuz.getAyahs().get(k);
@@ -220,10 +333,12 @@ public class ReadPage extends AppCompatActivity {
                             }
 
                             ayah.setTranslation(englishJuz.getAyahs().get(k).getArabicText());
-                            ayahList.add(ayah);
+                            fullAyahList.add(ayah);
                             int surahId = (ayah.getSurah() != null) ? ayah.getSurah().getSurah_number() : -1;
                             dbHelper.addAyah(ayah, surahId);
                         }
+                        ayahList.clear();
+                        ayahList.addAll(fullAyahList);
                         tvReadPageTitle.setText("Juz " + num);
                         adapter.notifyDataSetChanged();
                         scrollToLastPosition();

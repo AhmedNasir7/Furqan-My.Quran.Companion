@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.google.gms.google.services)
@@ -19,6 +21,19 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Generate BuildConfig with GEMINI_API_KEY from local.properties
+        val properties = Properties()
+        val localPropertiesFile = project.rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            properties.load(localPropertiesFile.inputStream())
+        }
+        val geminiApiKey = properties.getProperty("GEMINI_API_KEY") ?: ""
+        buildConfigField("String", "GEMINI_API_KEY", "\"$geminiApiKey\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -60,4 +75,6 @@ dependencies {
     implementation("androidx.media3:media3-common:1.10.0")
     implementation("androidx.media3:media3-session:1.10.0")
 
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0")
+    implementation("com.google.guava:guava:33.2.1-android")
 }

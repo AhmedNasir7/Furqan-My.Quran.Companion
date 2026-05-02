@@ -24,12 +24,28 @@ import com.example.furqanmyqurancompanion.Model.SurahResponse;
 import com.example.furqanmyqurancompanion.Model.Surah_Metadata;
 import com.example.furqanmyqurancompanion.R;
 
+import android.util.Log;
+import android.os.Handler;
+import android.os.Looper;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.widget.EditText;
+import android.widget.ProgressBar;
+
+import com.example.furqanmyqurancompanion.Model.DeepSearchService;
+import com.example.furqanmyqurancompanion.Model.Juz_Data;
+import com.google.ai.client.generativeai.type.GenerateContentResponse;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 public class quranFragment extends Fragment {
 
@@ -37,10 +53,13 @@ public class quranFragment extends Fragment {
     MyApplication application;
     Surah_RecyclerAdapter surahAdapter;
     Juz_RecyclerAdapter juzAdapter;
-
-
-
+    EditText et_search;
+    ProgressBar searchProgress;
+    DeepSearchService deepSearchService;
     AppCompatButton btn_by_surah, btn_by_juz;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
+    private boolean isSurahTab = true;
 
     public quranFragment() {
         // Required empty public constructor
@@ -58,29 +77,130 @@ public class quranFragment extends Fragment {
 
         init(view);
         setupTabs();
+        setupSearch();
     }
 
+    private void setupSearch() {
+        deepSearchService = new DeepSearchService();
+        et_search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (searchRunnable != null) searchHandler.removeCallbacks(searchRunnable);
+                searchRunnable = () -> performSearch(s.toString());
+                searchHandler.postDelayed(searchRunnable, 600);
+            }
+        });
+    }
 
+    private void performSearch(String query) {
+        if (query.isEmpty()) {
+            resetSearch();
+            return;
+        }
+
+        if (isSurahTab) {
+            List<Surah_Metadata> filtered = application.getSurahs_metadata().stream()
+                    .filter(s -> s.getSurah_english_name().toLowerCase().contains(query.toLowerCase()) ||
+                            String.valueOf(s.getSurah_number()).equals(query))
+                    .collect(Collectors.toList());
+
+            if (filtered.isEmpty() && query.length() > 3) {
+                performDeepSearch(query, "Surah");
+            } else {
+                surahAdapter.updateList(filtered);
+            }
+        } else {
+            List<Integer> filtered = application.getJuz_list().stream()
+                    .filter(j -> String.valueOf(j).equals(query))
+                    .collect(Collectors.toList());
+            juzAdapter.updateList(filtered);
+        }
+    }
+
+    private void performDeepSearch(String query, String type) {
+        searchProgress.setVisibility(View.VISIBLE);
+        ListenableFuture<GenerateContentResponse> future = deepSearchService.search(query, type);
+
+        Futures.addCallback(future, new FutureCallback<GenerateContentResponse>() {
+            @Override
+            public void onSuccess(GenerateContentResponse result) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    searchProgress.setVisibility(View.GONE);
+                    try {
+                        String json = result.getText();
+                        if (json != null) {
+                            // Extract JSON array if AI added markdown backticks
+                            if (json.contains("[") && json.contains("]")) {
+                                json = json.substring(json.indexOf("["), json.lastIndexOf("]") + 1);
+                            }
+                            JSONArray array = new JSONArray(json);
+                            List<Integer> ids = new ArrayList<>();
+                            for (int i = 0; i < array.length(); i++) {
+                                ids.add(array.getJSONObject(i).getInt("id"));
+                            }
+                            updateListWithIds(ids);
+                        }
+                    } catch (Exception e) {
+                        Log.e("quranFragment", "Deep search error", e);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                if (getActivity() == null) return;
+                getActivity().runOnUiThread(() -> searchProgress.setVisibility(View.GONE));
+            }
+        }, Executors.newSingleThreadExecutor());
+    }
+
+    private void updateListWithIds(List<Integer> ids) {
+        if (isSurahTab) {
+            List<Surah_Metadata> filtered = application.getSurahs_metadata().stream()
+                    .filter(s -> ids.contains(s.getSurah_number()))
+                    .collect(Collectors.toList());
+            surahAdapter.updateList(filtered);
+        }
+    }
+
+    private void resetSearch() {
+        if (isSurahTab) {
+            surahAdapter.updateList(application.getSurahs_metadata());
+        } else {
+            juzAdapter.updateList(application.getJuz_list());
+        }
+    }
 
     private void setupTabs() {
         btn_by_surah.setOnClickListener(v -> {
+            isSurahTab = true;
             rv_surah.setAdapter(surahAdapter);
             updateTabUI(btn_by_surah, btn_by_juz);
+            resetSearch();
+            et_search.setText("");
         });
 
         btn_by_juz.setOnClickListener(v -> {
-
+            isSurahTab = false;
             rv_surah.setAdapter(juzAdapter);
             updateTabUI(btn_by_juz, btn_by_surah);
+            resetSearch();
+            et_search.setText("");
         });
     }
 
     private void updateTabUI(AppCompatButton active, AppCompatButton inactive) {
-        active.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.secondary));
-        active.setTextColor(ContextCompat.getColor(getActivity(), R.color.white));
+        if (getContext() == null) return;
+        active.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), R.color.secondary));
+        active.setTextColor(ContextCompat.getColor(getContext(), R.color.white));
 
-        inactive.setBackgroundTintList(ContextCompat.getColorStateList(getActivity(), R.color.white));
-        inactive.setTextColor(ContextCompat.getColor(getActivity(), R.color.neutral));
+        inactive.setBackgroundTintList(ContextCompat.getColorStateList(getContext(), R.color.white));
+        inactive.setTextColor(ContextCompat.getColor(getContext(), R.color.neutral));
     }
 
 
@@ -88,12 +208,18 @@ public class quranFragment extends Fragment {
         rv_surah = view.findViewById(R.id.rv_surah);
         btn_by_surah = view.findViewById(R.id.btn_by_surah);
         btn_by_juz = view.findViewById(R.id.btn_by_juz);
+        et_search = view.findViewById(R.id.et_search);
+        searchProgress = view.findViewById(R.id.searchProgress);
 
         rv_surah.setLayoutManager(new LinearLayoutManager(getActivity(), RecyclerView.VERTICAL, false));
-        application=(MyApplication) getActivity().getApplicationContext();
-        surahAdapter = new Surah_RecyclerAdapter(getActivity(), application.getSurahs_metadata());
-        rv_surah.setAdapter(surahAdapter);
-
-        juzAdapter = new Juz_RecyclerAdapter(getActivity(), application.getJuz_list());
+        if (getActivity() != null) {
+            application = (MyApplication) getActivity().getApplicationContext();
+        }
+        
+        if (application != null) {
+            surahAdapter = new Surah_RecyclerAdapter(getActivity(), application.getSurahs_metadata());
+            rv_surah.setAdapter(surahAdapter);
+            juzAdapter = new Juz_RecyclerAdapter(getActivity(), application.getJuz_list());
+        }
     }
 }
