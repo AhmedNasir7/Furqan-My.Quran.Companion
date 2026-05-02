@@ -18,6 +18,12 @@
         android:supportsRtl="true"
         android:theme="@style/Base.Theme.Demo">
         <activity
+            android:name=".Activities.DuaDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activities.PrayerDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activities.TafseerActivity"
             android:exported="false" />
         <activity

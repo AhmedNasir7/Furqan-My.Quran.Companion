@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageButton;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,11 +54,16 @@ public class audioFragment extends Fragment {
     private CardView playerControlCard;
     private TextView tvNowPlaying;
     private ImageButton btnPlayPause;
+    private SeekBar playerSeekBar;
+    private TextView tvCurrentTime;
+    private TextView tvTotalTime;
 
     private List<Reciter> reciterList = new ArrayList<>();
     private String selectedReciterIdentifier = "ar.alafasy"; // Default
     private MediaController mediaController;
     private ListenableFuture<MediaController> controllerFuture;
+    private final android.os.Handler progressHandler = new android.os.Handler(android.os.Looper.getMainLooper());
+    private final Runnable updateProgressAction = this::updateProgress;
 
     public audioFragment() {
         // Required empty public constructor
@@ -102,6 +108,9 @@ public class audioFragment extends Fragment {
         playerControlCard = view.findViewById(R.id.playerControlCard);
         tvNowPlaying = view.findViewById(R.id.tvNowPlaying);
         btnPlayPause = view.findViewById(R.id.btnPlayPause);
+        playerSeekBar = view.findViewById(R.id.playerSeekBar);
+        tvCurrentTime = view.findViewById(R.id.tvCurrentTime);
+        tvTotalTime = view.findViewById(R.id.tvTotalTime);
 
         btnPlayPause.setOnClickListener(v -> {
             if (mediaController != null) {
@@ -110,6 +119,26 @@ public class audioFragment extends Fragment {
                 } else {
                     mediaController.play();
                 }
+            }
+        });
+
+        playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaController != null) {
+                    mediaController.seekTo(progress);
+                    tvCurrentTime.setText(formatTime(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                progressHandler.removeCallbacks(updateProgressAction);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                progressHandler.post(updateProgressAction);
             }
         });
     }
@@ -126,12 +155,28 @@ public class audioFragment extends Fragment {
                     @Override
                     public void onIsPlayingChanged(boolean isPlaying) {
                         updatePlayPauseIcon(isPlaying);
+                        if (isPlaying) {
+                            progressHandler.post(updateProgressAction);
+                        } else {
+                            progressHandler.removeCallbacks(updateProgressAction);
+                        }
+                    }
+
+                    @Override
+                    public void onPlaybackStateChanged(int playbackState) {
+                        if (playbackState == Player.STATE_READY) {
+                            playerSeekBar.setMax((int) mediaController.getDuration());
+                            tvTotalTime.setText(formatTime((int) mediaController.getDuration()));
+                            progressHandler.post(updateProgressAction);
+                        }
                     }
 
                     @Override
                     public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
                         if (mediaItem != null) {
                             tvNowPlaying.setText("Now Playing: " + mediaItem.mediaMetadata.title);
+                            playerSeekBar.setProgress(0);
+                            tvCurrentTime.setText("0:00");
                         }
                     }
                 });
@@ -141,11 +186,41 @@ public class audioFragment extends Fragment {
         }, MoreExecutors.directExecutor());
     }
 
+    private void updateProgress() {
+        if (mediaController != null && mediaController.isPlaying()) {
+            long currentPosition = mediaController.getCurrentPosition();
+            playerSeekBar.setProgress((int) currentPosition);
+            tvCurrentTime.setText(formatTime((int) currentPosition));
+            progressHandler.postDelayed(updateProgressAction, 1000);
+        }
+    }
+
+    private String formatTime(int millis) {
+        int seconds = (millis / 1000) % 60;
+        int minutes = (millis / (1000 * 60)) % 60;
+        int hours = (millis / (1000 * 60 * 60));
+
+        if (hours > 0) {
+            return String.format("%d:%02d:%02d", hours, minutes, seconds);
+        } else {
+            return String.format("%d:%02d", minutes, seconds);
+        }
+    }
+
     private void updatePlayerUi() {
         if (mediaController != null && mediaController.getCurrentMediaItem() != null) {
             playerControlCard.setVisibility(View.VISIBLE);
             tvNowPlaying.setText("Now Playing: " + mediaController.getCurrentMediaItem().mediaMetadata.title);
             updatePlayPauseIcon(mediaController.isPlaying());
+            
+            playerSeekBar.setMax((int) mediaController.getDuration());
+            playerSeekBar.setProgress((int) mediaController.getCurrentPosition());
+            tvTotalTime.setText(formatTime((int) mediaController.getDuration()));
+            tvCurrentTime.setText(formatTime((int) mediaController.getCurrentPosition()));
+            
+            if (mediaController.isPlaying()) {
+                progressHandler.post(updateProgressAction);
+            }
         }
     }
 
@@ -178,6 +253,26 @@ public class audioFragment extends Fragment {
             public void onFailure(Call<ReciterResponse> call, Throwable t) {
                 if (getContext() != null)
                     Toast.makeText(getContext(), "Failed to load reciters", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaController != null) {
+                    mediaController.seekTo(progress);
+                    tvCurrentTime.setText(formatTime(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                progressHandler.removeCallbacks(updateProgressAction);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                progressHandler.post(updateProgressAction);
             }
         });
     }
@@ -239,6 +334,26 @@ public class audioFragment extends Fragment {
             public void onFailure(Call<SurahContentResponse> call, Throwable t) {
                 if (isAdded() && getContext() != null)
                     Toast.makeText(getContext(), "Failed to load audio: " + t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser && mediaController != null) {
+                    mediaController.seekTo(progress);
+                    tvCurrentTime.setText(formatTime(progress));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                progressHandler.removeCallbacks(updateProgressAction);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                progressHandler.post(updateProgressAction);
             }
         });
     }

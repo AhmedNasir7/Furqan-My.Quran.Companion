@@ -21,4 +21,12 @@ public class Api_Client {
     public static QuranAPiService getQuranApiService() {
         return getClient().create(QuranAPiService.class);
     }
+
+    public static DuaApiService getDuaApiService() {
+        return new Retrofit.Builder()
+                .baseUrl("https://www.hisnmuslim.com/api/en/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build()
+                .create(DuaApiService.class);
+    }
 }

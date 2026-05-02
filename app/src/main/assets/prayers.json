@@ -1,0 +1,132 @@
+[
+  {
+    "name": "Namaz (Salah Guide)",
+    "steps": [
+      {
+        "title": "Niyyah (Intention)",
+        "description": "Stand facing the Qibla and make the intention in your heart for the prayer you are about to perform.",
+        "arabicText": ""
+      },
+      {
+        "title": "Takbiratul Ihram",
+        "description": "Raise your hands to your ears (men) or shoulders (women) and say 'Allahu Akbar'.",
+        "arabicText": "اللهُ أَكْبَرُ"
+      },
+      {
+        "title": "Qiyam - Sana",
+        "description": "Recite the opening supplication (Sana).",
+        "arabicText": "سُبْحَانَكَ اللَّهُمَّ وَبِحَمْدِكَ ، وَتَبَارَكَ اسْمُكَ ، وَتَعَالَى جَدُّكَ ، وَلَا إِلَهَ غَيْرُكَ"
+      },
+      {
+        "title": "Qiyam - Surah Al-Fatiha",
+        "description": "Recite the opening Surah of the Quran. It is mandatory in every Rakat.",
+        "arabicText": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ... الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ..."
+      },
+      {
+        "title": "Qiyam - Additional Surah",
+        "description": "Recite any other Surah or at least three verses from the Quran (e.g., Surah Al-Ikhlas).",
+        "arabicText": "بِسْمِ اللَّهِ الرَّحْمَنِ الرَّحِيمِ. قُلْ هُوَ اللَّهُ أَحَدٌ. اللَّهُ الصَّمَدُ. لَمْ يَلِدْ وَلَمْ يُولَدْ. وَلَمْ يَكُن لَّهُ كُفُوًا أَحَدٌ"
+      },
+      {
+        "title": "Ruku (Bowing)",
+        "description": "Say 'Allahu Akbar' and bow down. Recite 'Subhana Rabbiyal Azeem' three times.",
+        "arabicText": "سُبْحَانَ رَبِّيَ الْعَظِيمِ"
+      },
+      {
+        "title": "Sujud (Prostration)",
+        "description": "Say 'Allahu Akbar' and prostrate. Recite 'Subhana Rabbiyal الأَعْلَى' three times.",
+        "arabicText": "سُبْحَانَ رَبِّيَ الأَعْلَى"
+      },
+      {
+        "title": "Tashahhud",
+        "description": "Sitting after two or four Rakats, recite the Attahiyat.",
+        "arabicText": "التَّحِيَّاتُ لِلَّهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ..."
+      },
+      {
+        "title": "Durood-e-Ibrahim",
+        "description": "Recite blessings upon the Prophet (PBUH) in the final Rakat.",
+        "arabicText": "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ..."
+      },
+      {
+        "title": "Final Dua",
+        "description": "Recite a supplication before ending the prayer.",
+        "arabicText": "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ"
+      },
+      {
+        "title": "Tasleem (Salam)",
+        "description": "Turn your head to the right and then to the left saying 'Assalamu Alaikum wa Rahmatullah'.",
+        "arabicText": "السَّلامُ عَلَيْكُمْ وَرَحْمَةُ اللهِ"
+      }
+    ]
+  },
+  {
+    "name": "Namaz-e-Janaza (Funeral)",
+    "steps": [
+      {
+        "title": "1st Takbir",
+        "description": "Say 'Allahu Akbar' and recite Sana and Surah Al-Fatiha.",
+        "arabicText": "اللهُ أَكْبَرُ"
+      },
+      {
+        "title": "2nd Takbir",
+        "description": "Say 'Allahu Akbar' and recite Durood-e-Ibrahim.",
+        "arabicText": "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ..."
+      },
+      {
+        "title": "3rd Takbir",
+        "description": "Say 'Allahu Akbar' and recite the Dua for the deceased.",
+        "arabicText": "اللَّهُمَّ اغْفِرْ لِحَيِّنَا وَمَيِّتِنَا وَشَاهِدِنَا وَغَائِبِنَا وَصَغِيرِنَا وَكَبِيرِنَا وَذَكَرِنَا وَأُنْثَانَا..."
+      },
+      {
+        "title": "4th Takbir",
+        "description": "Say 'Allahu Akbar' and then perform Tasleem (Salam) to the right and left.",
+        "arabicText": "السَّلامُ عَلَيْكُمْ وَرَحْمَةُ اللهِ"
+      }
+    ]
+  },
+  {
+    "name": "Wudu (Ablution Guide)",
+    "steps": [
+      {
+        "title": "Niyyah & Bismillah",
+        "description": "Make intention and say Bismillah.",
+        "arabicText": "بِسْمِ اللَّهِ"
+      },
+      {
+        "title": "Washing Hands",
+        "description": "Wash both hands up to the wrists three times.",
+        "arabicText": ""
+      },
+      {
+        "title": "Rinsing Mouth",
+        "description": "Rinse the mouth three times.",
+        "arabicText": ""
+      },
+      {
+        "title": "Cleaning Nose",
+        "description": "Clean the nose by sniffing water three times.",
+        "arabicText": ""
+      },
+      {
+        "title": "Washing Face",
+        "description": "Wash the entire face three times.",
+        "arabicText": ""
+      },
+      {
+        "title": "Washing Arms",
+        "description": "Wash both arms up to and including the elbows three times.",
+        "arabicText": ""
+      },
+      {
+        "title": "Masah",
+        "description": "Wipe the head and ears once with wet hands.",
+        "arabicText": ""
+      },
+      {
+        "title": "Washing Feet",
+        "description": "Wash both feet up to and including the ankles three times.",
+        "arabicText": ""
+      }
+    ]
+  }
+]

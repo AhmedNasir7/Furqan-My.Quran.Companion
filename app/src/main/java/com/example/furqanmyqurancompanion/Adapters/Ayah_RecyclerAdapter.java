@@ -23,9 +23,9 @@ import java.util.List;
 
 public class Ayah_RecyclerAdapter extends RecyclerView.Adapter<Ayah_RecyclerAdapter.AyahViewHolder> {
 
-    private Context context;
-    private List<Ayah_Data> ayahs;
-    private DatabaseHelper dbHelper;
+    Context context;
+    List<Ayah_Data> ayahs;
+    DatabaseHelper dbHelper;
 
     public Ayah_RecyclerAdapter(Context context, List<Ayah_Data> ayahs) {
         this.context = context;
