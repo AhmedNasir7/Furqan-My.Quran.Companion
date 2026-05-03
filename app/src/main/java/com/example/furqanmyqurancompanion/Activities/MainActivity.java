@@ -11,12 +11,21 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.furqanmyqurancompanion.R;
 import com.example.furqanmyqurancompanion.Adapters.ViewPagerAdapter;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 
 public class MainActivity extends AppCompatActivity {
 
     public ViewPager2 pager;
     BottomNavigationView BottomNavView;
     ViewPagerAdapter adapter;
+    TextView tvHeaderUserName;
+    MaterialButton btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +38,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         init();
+        loadUserData();
 
         adapter = new ViewPagerAdapter(this);
         pager.setAdapter(adapter);
@@ -82,5 +92,35 @@ public class MainActivity extends AppCompatActivity {
     private void init() {
         pager = findViewById(R.id.viewPagerNav);
         BottomNavView = findViewById(R.id.BottomNavView);
+        tvHeaderUserName = findViewById(R.id.tvHeaderUserName);
+        btnLogout = findViewById(R.id.btnLogout);
+
+        btnLogout.setOnClickListener(v -> {
+            FirebaseAuth.getInstance().signOut();
+            SharedPreferences spref = getSharedPreferences("user", MODE_PRIVATE);
+            SharedPreferences.Editor editor = spref.edit();
+            editor.putBoolean("isLoggedIn", false);
+            editor.putBoolean("isGuest", false);
+            editor.apply();
+
+            startActivity(new Intent(MainActivity.this, LoginPage.class));
+            finish();
+        });
+    }
+
+    private void loadUserData() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            String name = user.getDisplayName();
+            if (name == null || name.isEmpty()) {
+                name = user.getEmail();
+                if (name != null && name.contains("@")) {
+                    name = name.split("@")[0];
+                }
+            }
+            tvHeaderUserName.setText(name);
+        } else {
+            tvHeaderUserName.setText("Guest User");
+        }
     }
 }

@@ -117,7 +117,12 @@ public class quranFragment extends Fragment {
             List<Integer> filtered = application.getJuz_list().stream()
                     .filter(j -> String.valueOf(j).equals(query))
                     .collect(Collectors.toList());
-            juzAdapter.updateList(filtered);
+            
+            if (filtered.isEmpty() && query.length() > 3) {
+                performDeepSearch(query, "Juz");
+            } else {
+                juzAdapter.updateList(filtered);
+            }
         }
     }
 
@@ -133,6 +138,7 @@ public class quranFragment extends Fragment {
                     searchProgress.setVisibility(View.GONE);
                     try {
                         String json = result.getText();
+                        Log.d("quranFragment", "Deep search response: " + json);
                         if (json != null) {
                             // Extract JSON array if AI added markdown backticks
                             if (json.contains("[") && json.contains("]")) {
@@ -141,20 +147,41 @@ public class quranFragment extends Fragment {
                             JSONArray array = new JSONArray(json);
                             List<Integer> ids = new ArrayList<>();
                             for (int i = 0; i < array.length(); i++) {
-                                ids.add(array.getJSONObject(i).getInt("id"));
+                                JSONObject obj = array.getJSONObject(i);
+                                Object idObj = obj.get("id");
+                                if (idObj instanceof Integer) {
+                                    ids.add((Integer) idObj);
+                                } else if (idObj instanceof String) {
+                                    String idStr = (String) idObj;
+                                    if (idStr.contains(":")) {
+                                        idStr = idStr.split(":")[0];
+                                    }
+                                    try {
+                                        // Remove all non-numeric characters before parsing
+                                        ids.add(Integer.parseInt(idStr.replaceAll("[^0-9]", "")));
+                                    } catch (NumberFormatException ignored) {}
+                                }
                             }
                             updateListWithIds(ids);
                         }
                     } catch (Exception e) {
-                        Log.e("quranFragment", "Deep search error", e);
+                        Log.e("quranFragment", "Deep search parsing error", e);
+                        Toast.makeText(getContext(), "Search failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
             }
 
             @Override
             public void onFailure(Throwable t) {
+                Log.e("quranFragment", "Deep search call failed", t);
                 if (getActivity() == null) return;
-                getActivity().runOnUiThread(() -> searchProgress.setVisibility(View.GONE));
+                getActivity().runOnUiThread(() -> {
+                    searchProgress.setVisibility(View.GONE);
+                    String errorMsg = "AI Search unavailable: " + t.getMessage();
+                    Toast.makeText(getContext(), errorMsg, Toast.LENGTH_LONG).show();
+                    Log.e("DeepSearchService", errorMsg, t);
+
+                });
             }
         }, Executors.newSingleThreadExecutor());
     }
@@ -165,6 +192,11 @@ public class quranFragment extends Fragment {
                     .filter(s -> ids.contains(s.getSurah_number()))
                     .collect(Collectors.toList());
             surahAdapter.updateList(filtered);
+        } else {
+            List<Integer> filtered = application.getJuz_list().stream()
+                    .filter(ids::contains)
+                    .collect(Collectors.toList());
+            juzAdapter.updateList(filtered);
         }
     }
 
