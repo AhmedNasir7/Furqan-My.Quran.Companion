@@ -47,30 +47,6 @@
             app:layout_constraintStart_toEndOf="@id/back_button_tasbeeh"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/profileCard"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginEnd="16dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:foreground="?attr/selectableItemBackground"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="4dp"
-            app:layout_constraintBottom_toBottomOf="@+id/tvAppName"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/tvAppName">
-
-            <ImageView
-                android:id="@+id/ivProfileIcon"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/text_light"
-                android:padding="8dp"
-                android:src="@drawable/icon_profile" />
-
-        </androidx.cardview.widget.CardView>
-
         <View
             android:id="@+id/divider"
             android:layout_width="match_parent"
