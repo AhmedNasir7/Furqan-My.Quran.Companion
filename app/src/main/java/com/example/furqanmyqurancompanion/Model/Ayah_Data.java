@@ -30,7 +30,7 @@ public class Ayah_Data {
     private int hizbQuarter;
 
     @SerializedName("sajda")
-    private boolean isSajda;
+    private Object sajda;
 
     @SerializedName("surah")
     private Surah_Metadata surah;
@@ -51,7 +51,13 @@ public class Ayah_Data {
     public int getManzilNumber() { return manzilNumber; }
     public int getRukuNumber() { return rukuNumber; }
     public int getHizbQuarter() { return hizbQuarter; }
-    public boolean isSajda() { return isSajda; }
+    public boolean isSajda() {
+        if (sajda instanceof Boolean) {
+            return (Boolean) sajda;
+        }
+        // If it's not a boolean, and not null, it's the Sajda object returned by the API
+        return sajda != null;
+    }
     public Surah_Metadata getSurah() { return surah; }
     public String getTranslation() { return translation; }
     public boolean isBookmarked() { return isBookmarked; }
@@ -66,7 +72,7 @@ public class Ayah_Data {
     public void setManzilNumber(int manzilNumber) { this.manzilNumber = manzilNumber; }
     public void setRukuNumber(int rukuNumber) { this.rukuNumber = rukuNumber; }
     public void setHizbQuarter(int hizbQuarter) { this.hizbQuarter = hizbQuarter; }
-    public void setIsSajda(boolean isSajda) { this.isSajda = isSajda; }
+    public void setIsSajda(boolean isSajda) { this.sajda = isSajda; }
     public void setSurah(Surah_Metadata surah) { this.surah = surah; }
     public void setTranslation(String translation) { this.translation = translation; }
     public void setBookmarked(boolean bookmarked) { isBookmarked = bookmarked; }

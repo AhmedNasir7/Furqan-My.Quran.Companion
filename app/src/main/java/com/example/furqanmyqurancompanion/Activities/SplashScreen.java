@@ -38,41 +38,66 @@ public class SplashScreen extends AppCompatActivity {
         });
 
         init();
-        new Handler().postDelayed(() -> {
-            MyApplication application = new MyApplication();
-            SharedPreferences spref = getSharedPreferences("user",MODE_PRIVATE);
-            boolean isLoggedIn = spref.getBoolean("isLoggedIn",false);
-            if(isLoggedIn==true)
-            {
-                String email = spref.getString("user_email","");
-                String password = spref.getString("user_password","");
+        
+        // Use a shorter delay and a simpler logic flow
+        new Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+            try {
+                SharedPreferences spref = getSharedPreferences("user", MODE_PRIVATE);
+                boolean isLoggedIn = spref.getBoolean("isLoggedIn", false);
+                boolean isGuest = spref.getBoolean("isGuest", false);
 
-
-                fb_auth.signInWithEmailAndPassword(email,password).addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                    @Override
-                    public void onSuccess(AuthResult authResult) {
-
-
-                        startActivity(new Intent(SplashScreen.this,MainActivity.class));
-                        finish();
+                if (isLoggedIn) {
+                    // Quick check: If Firebase already has a valid session, just go.
+                    if (fb_auth.getCurrentUser() != null) {
+                        startMainActivity();
+                        return;
                     }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(SplashScreen.this,e.getMessage(),Toast.LENGTH_LONG).show();
-                        startActivity(new Intent(SplashScreen.this, LoginPage.class));
-                        finish();
+
+                    String email = spref.getString("user_email", "");
+                    String password = spref.getString("user_password", "");
+
+                    if (email.isEmpty() || password.isEmpty()) {
+                        startLoginPage();
+                    } else {
+                        // Attempt login with a timeout or fallback
+                        fb_auth.signInWithEmailAndPassword(email, password)
+                                .addOnSuccessListener(authResult -> startMainActivity())
+                                .addOnFailureListener(e -> {
+                                    android.util.Log.e("SplashScreen", "Auto-login failed", e);
+                                    startLoginPage();
+                                });
+                        
+                        // Safety fallback: if no response in 10 seconds, go to login
+                        new Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                            if (!isFinishing()) {
+                                startLoginPage();
+                            }
+                        }, 10000);
                     }
-                });
-
+                } else if (isGuest) {
+                    startMainActivity();
+                } else {
+                    startLoginPage();
+                }
+            } catch (Exception e) {
+                android.util.Log.e("SplashScreen", "Error in Splash logic", e);
+                startLoginPage();
             }
-            else
-            {
-                startActivity(new Intent(SplashScreen.this, LoginPage.class));
-                finish();
-            }
+        }, 1500);
+    }
 
-        }, 4200);
+    private void startMainActivity() {
+        if (!isFinishing()) {
+            startActivity(new Intent(SplashScreen.this, MainActivity.class));
+            finish();
+        }
+    }
+
+    private void startLoginPage() {
+        if (!isFinishing()) {
+            startActivity(new Intent(SplashScreen.this, LoginPage.class));
+            finish();
+        }
     }
 
     public void init(){
