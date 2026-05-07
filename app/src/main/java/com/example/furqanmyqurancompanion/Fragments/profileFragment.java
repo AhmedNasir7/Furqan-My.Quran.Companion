@@ -58,6 +58,12 @@ public class profileFragment extends Fragment {
         loadBookmarks();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        loadBookmarks();
+    }
+
     private void init(View view) {
         rvBookmarks = view.findViewById(R.id.rvBookmarks);
         
