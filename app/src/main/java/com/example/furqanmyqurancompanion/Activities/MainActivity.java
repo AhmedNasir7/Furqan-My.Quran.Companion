@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new ViewPagerAdapter(this);
         pager.setAdapter(adapter);
+        pager.setOffscreenPageLimit(4);
 
         BottomNavView.setOnItemSelectedListener(item -> {
             int itemId = item.getItemId();

@@ -22,8 +22,8 @@ public class MyApplication extends Application {
 
     private String Juz_Clicked = null;
     private String Surah_Clicked = null;
-    private List<Surah_Metadata> surahs_metadata = new ArrayList<>();
-    private List<Integer> juz_list = new ArrayList<>();
+    private final List<Surah_Metadata> surahs_metadata = new ArrayList<>();
+    private final List<Integer> juz_list = new ArrayList<>();
     private DatabaseHelper dbHelper;
 
     @Override
@@ -31,26 +31,34 @@ public class MyApplication extends Application {
         super.onCreate();
         dbHelper = new DatabaseHelper(this);
         
-        if (dbHelper.isSurahMetadataLoaded()) {
-            surahs_metadata.addAll(dbHelper.getAllSurahMetadata());
-        } else {
-            fetchSurahData();
-        }
-
-        if (juz_list.isEmpty()) {
-            for (int i = 1; i <= 30; i++) {
-                juz_list.add(i);
+        new Thread(() -> {
+            if (dbHelper.isSurahMetadataLoaded()) {
+                List<Surah_Metadata> metadata = dbHelper.getAllSurahMetadata();
+                synchronized (surahs_metadata) {
+                    surahs_metadata.clear();
+                    surahs_metadata.addAll(metadata);
+                }
+            } else {
+                fetchSurahData();
             }
-        }
 
-        if (!dbHelper.isQuranLoaded()) {
-            downloadAllQuran();
-        }
+            if (juz_list.isEmpty()) {
+                for (int i = 1; i <= 30; i++) {
+                    juz_list.add(i);
+                }
+            }
+
+            if (!dbHelper.isQuranLoaded()) {
+                try { Thread.sleep(5000); } catch (InterruptedException ignored) {}
+                downloadAllQuran();
+            }
+        }).start();
     }
 
     private void downloadAllQuran() {
         new Thread(() -> {
             QuranAPiService apiService = Api_Client.getQuranApiService();
+            android.util.Log.d("MyApplication", "Starting background Quran download...");
             for (int i = 1; i <= 114; i++) {
                 final int surahNum = i;
                 apiService.getSurahWithTranslation(surahNum).enqueue(new Callback<SurahContentResponse>() {
@@ -58,24 +66,35 @@ public class MyApplication extends Application {
                     public void onResponse(Call<SurahContentResponse> call, Response<SurahContentResponse> response) {
                         if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
                             List<Surah_Data> surahs = response.body().getData();
-                            if (surahs.size() >= 2) {
+                            if (surahs != null && surahs.size() >= 2) {
                                 Surah_Data arabicSurah = surahs.get(0);
                                 Surah_Data englishSurah = surahs.get(1);
-                                for (int m = 0; m < arabicSurah.getAyahs().size(); m++) {
-                                    Ayah_Data ayah = arabicSurah.getAyahs().get(m);
-                                    ayah.setTranslation(englishSurah.getAyahs().get(m).getArabicText());
-                                    dbHelper.addAyah(ayah, surahNum);
+                                if (arabicSurah.getAyahs() != null && englishSurah.getAyahs() != null) {
+                                    List<Ayah_Data> ayahsToSave = new ArrayList<>();
+                                    int size = Math.min(arabicSurah.getAyahs().size(), englishSurah.getAyahs().size());
+                                    for (int m = 0; m < size; m++) {
+                                        Ayah_Data ayah = arabicSurah.getAyahs().get(m);
+                                        ayah.setTranslation(englishSurah.getAyahs().get(m).getArabicText());
+                                        ayahsToSave.add(ayah);
+                                    }
+                                    new Thread(() -> {
+                                        dbHelper.addAyahs(ayahsToSave, surahNum);
+                                        android.util.Log.d("MyApplication", "Saved Surah " + surahNum + " to database.");
+                                    }).start();
                                 }
                             }
+                        } else {
+                            android.util.Log.e("MyApplication", "Failed to download surah " + surahNum + ". Code: " + response.code());
                         }
                     }
 
                     @Override
                     public void onFailure(Call<SurahContentResponse> call, Throwable t) {
+                        android.util.Log.e("MyApplication", "Error downloading surah " + surahNum + ": " + t.getMessage(), t);
                     }
                 });
                 // Small delay to avoid hitting API rate limits too hard
-                try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+                try { Thread.sleep(600); } catch (InterruptedException e) { e.printStackTrace(); }
             }
         }).start();
     }
@@ -119,11 +138,16 @@ public class MyApplication extends Application {
     }
 
     public List<Surah_Metadata> getSurahs_metadata() {
-        return surahs_metadata;
+        synchronized (surahs_metadata) {
+            return new ArrayList<>(surahs_metadata);
+        }
     }
 
     public void setSurahs_metadata(List<Surah_Metadata> surahs_metadata) {
-        this.surahs_metadata = surahs_metadata;
+        synchronized (this.surahs_metadata) {
+            this.surahs_metadata.clear();
+            this.surahs_metadata.addAll(surahs_metadata);
+        }
     }
 
     public List<Integer> getJuz_list() {
@@ -131,7 +155,8 @@ public class MyApplication extends Application {
     }
 
     public void setJuz_list(List<Integer> juz_list) {
-        this.juz_list = juz_list;
+        this.juz_list.clear();
+        this.juz_list.addAll(juz_list);
     }
 
     private void fetchSurahData() {
@@ -142,12 +167,13 @@ public class MyApplication extends Application {
             @Override
             public void onResponse(Call<SurahResponse> call, Response<SurahResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    surahs_metadata.clear();
-                    surahs_metadata.addAll(response.body().getData());
+                    List<Surah_Metadata> data = response.body().getData();
+                    synchronized (surahs_metadata) {
+                        surahs_metadata.clear();
+                        surahs_metadata.addAll(data);
+                    }
                     new Thread(() -> {
-                        for (Surah_Metadata surah : response.body().getData()) {
-                            dbHelper.addSurahMetadata(surah);
-                        }
+                        dbHelper.addSurahsMetadata(data);
                     }).start();
                 }
             }

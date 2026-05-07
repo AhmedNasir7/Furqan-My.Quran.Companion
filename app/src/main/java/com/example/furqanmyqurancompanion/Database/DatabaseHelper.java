@@ -64,6 +64,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     @Override
+    public void onConfigure(SQLiteDatabase db) {
+        super.onConfigure(db);
+        db.enableWriteAheadLogging();
+    }
+
+    @Override
     public void onCreate(SQLiteDatabase db) {
         String createSurahTable = "CREATE TABLE " + TABLE_SURAHS + " (" +
                 COL_SURAH_ID + " INTEGER PRIMARY KEY," +
@@ -156,6 +162,25 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insertWithOnConflict(TABLE_SURAHS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
     }
 
+    public void addSurahsMetadata(List<Surah_Metadata> surahs) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (Surah_Metadata surah : surahs) {
+                ContentValues values = new ContentValues();
+                values.put(COL_SURAH_ID, surah.getSurah_number());
+                values.put(COL_SURAH_ARABIC_NAME, surah.getSurah_arabic_name());
+                values.put(COL_SURAH_ENGLISH_NAME, surah.getSurah_english_name());
+                values.put(COL_SURAH_ENGLISH_MEANING, surah.getSurah_english_meaning());
+                values.put(COL_SURAH_AYAH_COUNT, surah.getSurah_ayahs());
+                db.insertWithOnConflict(TABLE_SURAHS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
     public List<Surah_Metadata> getAllSurahMetadata() {
         List<Surah_Metadata> list = new ArrayList<>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -197,6 +222,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COL_AYAH_HIZB, ayah.getHizbQuarter());
         values.put(COL_AYAH_SAJDA, ayah.isSajda() ? 1 : 0);
         db.insertWithOnConflict(TABLE_AYAHS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+    }
+
+    public void addAyahs(List<Ayah_Data> ayahs, int surahId) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            for (Ayah_Data ayah : ayahs) {
+                ContentValues values = new ContentValues();
+                values.put(COL_AYAH_GLOBAL_ID, ayah.getGlobalVerseNumber());
+                values.put(COL_AYAH_SURAH_ID, surahId);
+                values.put(COL_AYAH_NUMBER_IN_SURAH, ayah.getVerseNumber());
+                values.put(COL_AYAH_ARABIC_TEXT, ayah.getArabicText());
+                values.put(COL_AYAH_TRANSLATION, ayah.getTranslation());
+                values.put(COL_AYAH_JUZ, ayah.getJuzNumber());
+                values.put(COL_AYAH_PAGE, ayah.getPageNumber());
+                values.put(COL_AYAH_MANZIL, ayah.getManzilNumber());
+                values.put(COL_AYAH_RUKU, ayah.getRukuNumber());
+                values.put(COL_AYAH_HIZB, ayah.getHizbQuarter());
+                values.put(COL_AYAH_SAJDA, ayah.isSajda() ? 1 : 0);
+                db.insertWithOnConflict(TABLE_AYAHS, null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     public List<Ayah_Data> getAyahsForSurah(int surahId, String userId) {
